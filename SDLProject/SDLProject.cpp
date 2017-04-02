@@ -91,7 +91,7 @@ float frameTime = 0;
 int prevTime = 0;
 int currentTime = 0;
 float deltaTime = 0;
-float movSpeed = 100.0f;
+float movSpeed = 101.0f;
 
 
 SDL_Window* gWindow = nullptr;
