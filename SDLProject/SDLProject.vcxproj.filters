@@ -27,7 +27,7 @@
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Sam Minton\Desktop\SDLProject\SDLProject\SDLProject\definitions.h">
+    <ClInclude Include="definitions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

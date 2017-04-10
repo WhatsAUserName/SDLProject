@@ -350,7 +350,7 @@ bool init() {
 bool loadMedia(Tile* tiles[]) {
 	bool success = true;
 	
-	if (!gCharTexture.loadFromFile("images/sprite.png")) {
+	if (!gCharTexture.loadFromFile("images/sprite.bmp")) {
 		printf("failed to load sprite sheet");
 		success = false;
 	}
