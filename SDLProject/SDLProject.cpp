@@ -155,3 +155,101 @@ int main(int argc, char* args[]) {
 
 	
 }
+
+/*bool setTiles(Tile* tiles[])
+{
+	//Success flag
+	bool tilesLoaded = true;
+
+	//The tile offsets
+	int x = 0, y = 0;
+
+	//Open the map
+	std::ifstream map("mapdata/map.txt");
+
+	//If the map couldn't be loaded
+	if (!map.is_open())
+	{
+		printf("Unable to load map file!\n");
+		tilesLoaded = false;
+	}
+	else
+	{
+		//Initialize the tiles
+		for (int i = 0; i < TOTAL_TILES; ++i)
+		{
+			//Determines what kind of tile will be made
+			int tileType = -1;
+
+			//Read tile from map file
+			map >> tileType;
+
+			//If the was a problem in reading the map
+			if (map.fail())
+			{
+				//Stop loading map
+				printf("Error loading map: Unexpected end of file!\n");
+				tilesLoaded = false;
+				break;
+			}
+
+			//If the number is a valid tile number
+			if ((tileType >= 0) && (tileType < TOTAL_TILE_SPRITES))
+			{
+				tiles[i] = new Tile(x, y, tileType);
+			}
+			//If we don't recognize the tile type
+			else
+			{
+				//Stop loading map
+				printf("Error loading map: Invalid tile type at %d!\n", i);
+				tilesLoaded = false;
+				break;
+			}
+			//Move to next tile spot
+			x += TILE_WIDTH;
+
+			//If we've gone too far
+if (x >= LEVEL_WIDTH)
+			{
+				//Move back
+				x = 0;
+
+				//Move to the next row
+				y += TILE_HEIGHT;
+			}
+		}
+		if (tilesLoaded)
+		{
+			gTileClips[TILE_GRASS].x = 0;
+			gTileClips[TILE_GRASS].y = 0;
+			gTileClips[TILE_GRASS].w = TILE_WIDTH;
+			gTileClips[TILE_GRASS].h = TILE_HEIGHT;
+		}
+	}
+	map.close();
+	return tilesLoaded;
+}*/
+
+/*void Char::setCamera(SDL_Rect& camera) {
+ 	camera.x = (cPos.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
+ 	camera.y = (cPos.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
+ 
+ 	//Keep the camera in bounds
+ 	if (camera.x < 0)
+ 	{
+ 		camera.x = 0;
+ 	}
+ 	if (camera.y < 0)
+ 	{
+ 		camera.y = 0;
+ 	}
+ 	if (camera.x > LEVEL_WIDTH - camera.w)
+ 	{
+ 		camera.x = LEVEL_WIDTH - camera.w;
+ 	}
+ 	if (camera.y > LEVEL_HEIGHT - camera.h)
+ 	{
+ 		camera.y = LEVEL_HEIGHT - camera.h;
+ 	}
+ }*/
