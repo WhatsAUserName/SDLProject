@@ -229,7 +229,7 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
 }
 
 
-/*bool init() {
+bool init() {
 	bool success = true;
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		printf("SDL initialisation failed, aborting");
@@ -244,12 +244,10 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
 		window = SDL_CreateWindow("Try", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 		renderTarget = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		currentImage = LoadTexture("images/sprite.png", renderTarget);
-
-		SDL_QueryTexture(currentImage, NULL, NULL, &textureWidth, &textureHeight);
 		success = true;
 	}
 	return success;
-}*/
+}
 
 
 
@@ -277,105 +275,99 @@ int main(int argc, char* args[]) {
 	int frameWidth, frameHeight;
 	int textureWidth, textureHeight;
 
-	
-	
 
-	SDL_Init(SDL_INIT_VIDEO);
-
-	int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
-	if (!(IMG_Init(imgFlags)&imgFlags))
-	{
-		std::cout << "Error 3" << IMG_GetError() << std::endl;
+	if (!init()) {
+		printf("Failed initilising");
 	}
-	window = SDL_CreateWindow("Try", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	renderTarget = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	currentImage = LoadTexture("images/sprite.png", renderTarget);
+	else {
 
-	SDL_QueryTexture(currentImage, NULL, NULL, &textureWidth, &textureHeight);
 
-	frameWidth = textureWidth / 4;
-	frameHeight = textureHeight / 4;
 
-	playerRect.x = playerRect.y = 0;
-	playerRect.w = frameWidth;
-	playerRect.h = frameHeight;
-	//Set Background color
-	SDL_SetRenderDrawColor(renderTarget, 0xFD, 0, 0, 0xFD);
+		SDL_QueryTexture(currentImage, NULL, NULL, &textureWidth, &textureHeight);
 
-	Tile* tileSet[TOTAL_TILES];
+		frameWidth = textureWidth / 4;
+		frameHeight = textureHeight / 4;
 
-	bool isRunning = true;
-	SDL_Event e;
+		playerRect.x = playerRect.y = 0;
+		playerRect.w = frameWidth;
+		playerRect.h = frameHeight;
+		//Set Background color
+		SDL_SetRenderDrawColor(renderTarget, 0xFD, 0, 0, 0xFD);
 
-	while (isRunning)
-	{
-		prevTime = currentTime;
-		currentTime = SDL_GetTicks();
-		deltaTime = (currentTime - prevTime) / 1000.0f;
-		while (SDL_PollEvent(&e) != 0)
+		Tile* tileSet[TOTAL_TILES];
+
+		bool isRunning = true;
+		SDL_Event e;
+
+		while (isRunning)
 		{
-			if (e.type == SDL_QUIT)
+			prevTime = currentTime;
+			currentTime = SDL_GetTicks();
+			deltaTime = (currentTime - prevTime) / 1000.0f;
+			while (SDL_PollEvent(&e) != 0)
 			{
-				isRunning = false;
-			}
-			
-		}
-		keyState = SDL_GetKeyboardState(NULL);
+				if (e.type == SDL_QUIT)
+				{
+					isRunning = false;
+				}
 
-		if (keyState[SDL_SCANCODE_RIGHT]) {
-			playerRect.y = 100;
-			playerPos.x += movSpeed *deltaTime;
-		}
-		else if (keyState[SDL_SCANCODE_LEFT])
-		{
-			playerRect.y = 50;
-			playerPos.x -= movSpeed *deltaTime;
-		}
-		/*else if (keyState[SDL_SCANCODE_UP]) {
-			playerRect.y = 150;
-			playerPos.y -= movSpeed *deltaTime;
-		}
-		else if (keyState[SDL_SCANCODE_DOWN]) {
-			playerRect.y = 0;
-			playerPos.y += movSpeed *deltaTime;*/
-		else if (keyState[SDL_SCANCODE_SPACE]&&!jumping) {
-			jumping = true;
-		}
-		if (jumping) {
-			playerPos.y -= jumpvel;
-			jumpvel -= gravity;
-		}
-		if (playerPos.y == groundlevel) {
-			jumpvel = 5;
-			jumping = false;
-		}
-		frameTime += deltaTime;
-		if (frameTime >= 0.25f)
-		{
-			frameTime = 0;
-			playerRect.x += frameWidth;
-			if (playerRect.x >= textureWidth)
+			}
+			keyState = SDL_GetKeyboardState(NULL);
+
+			if (keyState[SDL_SCANCODE_RIGHT]) {
+				playerRect.y = 100;
+				playerPos.x += movSpeed *deltaTime;
+			}
+			else if (keyState[SDL_SCANCODE_LEFT])
 			{
-				playerRect.x = 0;
+				playerRect.y = 50;
+				playerPos.x -= movSpeed *deltaTime;
 			}
+			/*else if (keyState[SDL_SCANCODE_UP]) {
+				playerRect.y = 150;
+				playerPos.y -= movSpeed *deltaTime;
+			}
+			else if (keyState[SDL_SCANCODE_DOWN]) {
+				playerRect.y = 0;
+				playerPos.y += movSpeed *deltaTime;*/
+			else if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
+				jumping = true;
+			}
+			if (jumping) {
+				playerPos.y -= jumpvel;
+				jumpvel -= gravity;
+			}
+			if (playerPos.y == groundlevel) {
+				jumpvel = 5;
+				jumping = false;
+			}
+			frameTime += deltaTime;
+			if (frameTime >= 0.25f)
+			{
+				frameTime = 0;
+				playerRect.x += frameWidth;
+				if (playerRect.x >= textureWidth)
+				{
+					playerRect.x = 0;
+				}
+			}
+
+
+			SDL_RenderClear(renderTarget);
+			SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
+			SDL_RenderPresent(renderTarget);
 		}
+		SDL_DestroyWindow(window);
+		SDL_DestroyTexture(currentImage);
+		SDL_DestroyRenderer(renderTarget);
+		window = nullptr;
+		currentImage = nullptr;
+		renderTarget = nullptr;
 
+		SDL_Quit();
 
-		SDL_RenderClear(renderTarget);
-		SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
-		SDL_RenderPresent(renderTarget);
+		return 0;
 	}
-	SDL_DestroyWindow(window);
-	SDL_DestroyTexture(currentImage);
-	SDL_DestroyRenderer(renderTarget);
-	window = nullptr;
-	currentImage = nullptr;
-	renderTarget = nullptr;
-
-	SDL_Quit();
-
-	return 0;
-
 	
 }
 
