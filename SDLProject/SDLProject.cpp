@@ -9,6 +9,106 @@
 #include "Game.h"
 #include "definitions.h"
 
+SDL_Rect gTileClips[TOTAL_TILE_SPRITES];
+
+SDL_Window *window = nullptr;
+SDL_Texture *currentImage = nullptr;
+SDL_Renderer *renderTarget = nullptr;
+
+
+
+
+bool checkCollision(SDL_Rect a, SDL_Rect b);
+
+bool touchGround(SDL_Rect box, Tile* tiles[]);
+
+WTexture gTileTexture;
+
+
+WTexture::WTexture() {
+
+	texture = NULL;
+	mWidth = 0;
+	mHeight = 0;
+
+}
+
+WTexture::~WTexture() {
+
+	free();
+}
+
+void WTexture::free() {
+	if (texture != NULL) {
+		SDL_DestroyTexture(texture);
+		texture = NULL;
+		mWidth = 0;
+		mHeight = 0;
+	}
+}
+
+void WTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
+{
+	//Set rendering space and render to screen
+	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
+
+	//Set clip rendering dimensions
+	if (clip != NULL)
+	{
+		renderQuad.w = clip->w;
+		renderQuad.h = clip->h;
+	}
+
+	//Render to screen
+	SDL_RenderCopyEx(renderTarget, texture, clip, &renderQuad, angle, center, flip);
+}
+
+int WTexture::getWidth() {
+	return mWidth;
+}
+
+int WTexture::getHeight() {
+
+	return mHeight;
+}
+
+bool setTiles(Tile* tiles[]);
+
+Tile::Tile(int x, int y, int tileType)
+{
+	//Get the offsets
+	tBox.x = x;
+	tBox.y = y;
+
+	//Set the collision box
+	tBox.w = TILE_WIDTH;
+	tBox.h = TILE_HEIGHT;
+
+	//Get the tile type
+	mType = tileType;
+}
+
+void Tile::render(SDL_Rect& camera)
+{
+	//If the tile is on screen
+	if (checkCollision(camera, tBox))
+	{
+		//Show the tile
+		gTileTexture.render(tBox.x - camera.x, tBox.y - camera.y, &gTileClips[mType]);
+	}
+}
+
+int Tile::getType()
+{
+	return mType;
+}
+
+SDL_Rect Tile::getBox()
+{
+	return tBox;
+}
+
+
 
 SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 {
@@ -25,13 +125,136 @@ SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 	return texture;
 }
 
+
+bool setTiles(Tile *tiles[]) {
+	bool tilesLoaded = true;
+
+	int x = 0, y = 0;
+
+	//Open the map
+
+	std::ifstream map("mapdata/map.txt");
+
+	if (!map.is_open()) {
+		printf("Unable to load map");
+		tilesLoaded = false;
+	}
+	else
+	{
+		for (int i = 0; i < TOTAL_TILES; i++)
+		{
+			int tileType = -1;
+
+			map >> tileType;
+
+			if (map.fail())
+			{
+				printf("Error loading map, end of file error");
+				tilesLoaded = false;
+				break;
+			}
+			if ((tileType >= 0) && (tileType < TOTAL_TILE_SPRITES))
+			{
+				tiles[i] = new Tile(x, y, tileType);
+			}
+			else
+			{
+				printf("Error loading map");
+				tilesLoaded = false;
+				break;
+			}
+			x += TILE_WIDTH;
+
+			if (x >= LEVEL_WIDTH) {
+				x = 0;
+
+				y += TILE_HEIGHT;
+			}
+		}
+		if (tilesLoaded)
+		{
+			gTileClips[TILE_GRASS].x = 0;
+			gTileClips[TILE_GRASS].y = 0;
+			gTileClips[TILE_GRASS].w = TILE_WIDTH;
+			gTileClips[TILE_GRASS].h = TILE_HEIGHT;
+		}
+	}
+	map.close();
+	return tilesLoaded;
+}
+
+bool checkCollision(SDL_Rect a, SDL_Rect b)
+{
+	//The sides of the rectangles
+	int leftA, leftB;
+	int rightA, rightB;
+	int topA, topB;
+	int bottomA, bottomB;
+
+	//Calculate the sides of rect A
+	leftA = a.x;
+	rightA = a.x + a.w;
+	topA = a.y;
+	bottomA = a.y + a.h;
+
+	//Calculate the sides of rect B
+	leftB = b.x;
+	rightB = b.x + b.w;
+	topB = b.y;
+	bottomB = b.y + b.h;
+
+	//If any of the sides from A are outside of B
+	if (bottomA <= topB)
+	{
+		return false;
+	}
+
+	if (topA >= bottomB)
+	{
+		return false;
+	}
+
+	if (rightA <= leftB)
+	{
+		return false;
+	}
+
+	if (leftA >= rightB)
+	{
+		return false;
+	}
+
+	//If none of the sides from A are outside B
+	return true;
+}
+
+
+/*bool init() {
+	bool success = true;
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		printf("SDL initialisation failed, aborting");
+		success = false;
+	}
+	else {
+		int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+		if (!(IMG_Init(imgFlags)&imgFlags))
+		{
+			std::cout << "Error 3" << IMG_GetError() << std::endl;
+		}
+		window = SDL_CreateWindow("Try", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		renderTarget = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+		currentImage = LoadTexture("images/sprite.png", renderTarget);
+
+		SDL_QueryTexture(currentImage, NULL, NULL, &textureWidth, &textureHeight);
+		success = true;
+	}
+	return success;
+}*/
+
+
+
+
 int main(int argc, char* args[]) {
-
-	//Game theGame;
-	//theGame.Run();
-
-
-	//return 0;
 
 	
 	const int FPS = 60;
@@ -45,11 +268,6 @@ int main(int argc, char* args[]) {
 	float jumpvel = 5;
 	float gravity = 0.2f;
 	int groundlevel = 430;
-
-
-	SDL_Window *window = nullptr;
-	SDL_Texture *currentImage = nullptr;
-	SDL_Renderer *renderTarget = nullptr;
 	SDL_Rect playerRect;
 	SDL_Rect playerPos;
 	playerPos.x = 0;
@@ -58,6 +276,9 @@ int main(int argc, char* args[]) {
 	playerPos.h = 50;
 	int frameWidth, frameHeight;
 	int textureWidth, textureHeight;
+
+	
+	
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -80,6 +301,8 @@ int main(int argc, char* args[]) {
 	playerRect.h = frameHeight;
 	//Set Background color
 	SDL_SetRenderDrawColor(renderTarget, 0xFD, 0, 0, 0xFD);
+
+	Tile* tileSet[TOTAL_TILES];
 
 	bool isRunning = true;
 	SDL_Event e;
@@ -156,80 +379,9 @@ int main(int argc, char* args[]) {
 	
 }
 
-/*bool setTiles(Tile* tiles[])
-{
-	//Success flag
-	bool tilesLoaded = true;
 
-	//The tile offsets
-	int x = 0, y = 0;
 
-	//Open the map
-	std::ifstream map("mapdata/map.txt");
 
-	//If the map couldn't be loaded
-	if (!map.is_open())
-	{
-		printf("Unable to load map file!\n");
-		tilesLoaded = false;
-	}
-	else
-	{
-		//Initialize the tiles
-		for (int i = 0; i < TOTAL_TILES; ++i)
-		{
-			//Determines what kind of tile will be made
-			int tileType = -1;
-
-			//Read tile from map file
-			map >> tileType;
-
-			//If the was a problem in reading the map
-			if (map.fail())
-			{
-				//Stop loading map
-				printf("Error loading map: Unexpected end of file!\n");
-				tilesLoaded = false;
-				break;
-			}
-
-			//If the number is a valid tile number
-			if ((tileType >= 0) && (tileType < TOTAL_TILE_SPRITES))
-			{
-				tiles[i] = new Tile(x, y, tileType);
-			}
-			//If we don't recognize the tile type
-			else
-			{
-				//Stop loading map
-				printf("Error loading map: Invalid tile type at %d!\n", i);
-				tilesLoaded = false;
-				break;
-			}
-			//Move to next tile spot
-			x += TILE_WIDTH;
-
-			//If we've gone too far
-if (x >= LEVEL_WIDTH)
-			{
-				//Move back
-				x = 0;
-
-				//Move to the next row
-				y += TILE_HEIGHT;
-			}
-		}
-		if (tilesLoaded)
-		{
-			gTileClips[TILE_GRASS].x = 0;
-			gTileClips[TILE_GRASS].y = 0;
-			gTileClips[TILE_GRASS].w = TILE_WIDTH;
-			gTileClips[TILE_GRASS].h = TILE_HEIGHT;
-		}
-	}
-	map.close();
-	return tilesLoaded;
-}*/
 
 /*void Char::setCamera(SDL_Rect& camera) {
  	camera.x = (cPos.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
