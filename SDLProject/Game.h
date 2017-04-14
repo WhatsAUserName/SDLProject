@@ -40,7 +40,28 @@ private:
 };
 
 
+class Dot
+{
+public:
+	
 
+	
+
+	//Initializes the variables
+	Dot();
+
+	
+	//Centers the camera over the dot
+	void setCamera(SDL_Rect& camera);
+
+
+private:
+	//Collision box of the dot
+	SDL_Rect mBox;
+
+	//The velocity of the dot
+	int mVelX, mVelY;
+};
 
 bool init();
 
