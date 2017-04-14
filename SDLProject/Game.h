@@ -6,6 +6,8 @@ public:
 
 	~WTexture();
 
+	bool loadFromFile(std::string path);
+
 	void free();
 
 	void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
@@ -35,6 +37,24 @@ private:
 	SDL_Rect tBox;
 
 	int mType;
+};
+
+
+class Char {
+public:
+	
+	Char();
+
+	void setCamera(SDL_Rect& camera);
+
+	void render(SDL_Rect& camera);
+
+private:
+	SDL_Rect cBox;
+	SDL_Rect cPos;
+
+	float charPosx, charPosy;
+
 };
 
 bool init();

@@ -14,8 +14,11 @@
 #define SCREEN_HEIGHT 480
 #define SPRITE_SIZE    32
 
-const int LEVEL_WIDTH = 1280;
-const int LEVEL_HEIGHT = 960;
+const int LEVEL_WIDTH = 640;
+const int LEVEL_HEIGHT = 480;
+
+const int CHAR_WIDTH = 32;
+const int CHAR_HEIGHT = 50;
 
 const int TILE_WIDTH = 80;
 const int TILE_HEIGHT = 80;

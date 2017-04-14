@@ -16,13 +16,14 @@ SDL_Texture *currentImage = nullptr;
 SDL_Renderer *renderTarget = nullptr;
 
 
-
+bool loadMedia(Tile *tile[]);
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
 
 bool touchGround(SDL_Rect box, Tile* tiles[]);
 
 WTexture gTileTexture;
+WTexture gCharTexture;
 
 
 WTexture::WTexture() {
@@ -36,6 +37,48 @@ WTexture::WTexture() {
 WTexture::~WTexture() {
 
 	free();
+}
+
+
+
+bool WTexture::loadFromFile(std::string filepath) {
+	free();
+
+	//The final texture
+	SDL_Texture* newTexture = NULL;
+
+	//Load image at specified path
+	SDL_Surface* loadedSurface = IMG_Load(filepath.c_str());
+	if (loadedSurface == NULL)
+	{
+		printf("Unable to load image %s! SDL_image Error: %s\n", filepath.c_str(), IMG_GetError());
+	}
+	else
+	{
+		//Color key image
+		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+
+		//Create texture from surface pixels
+		newTexture = SDL_CreateTextureFromSurface(renderTarget, loadedSurface);
+		if (newTexture == NULL)
+		{
+			printf("Unable to create texture from %s! SDL Error: %s\n", filepath.c_str(), SDL_GetError());
+		}
+		else
+		{
+			//Get image dimensions
+			mWidth = loadedSurface->w;
+			mHeight = loadedSurface->h;
+		}
+
+		//Get rid of old loaded surface
+		SDL_FreeSurface(loadedSurface);
+	}
+
+	//Return success
+	texture = newTexture;
+	return texture != NULL;
+
 }
 
 void WTexture::free() {
@@ -108,6 +151,48 @@ SDL_Rect Tile::getBox()
 	return tBox;
 }
 
+Char::Char() {
+
+	cPos.x = 0;
+	cPos.y = 430;
+	cPos.w = CHAR_WIDTH;
+	cPos.h = CHAR_HEIGHT;
+
+
+	cBox.x = cBox.y = 0;
+
+
+	charPosx = 0;
+	charPosy = 0;
+}
+
+void Char::setCamera(SDL_Rect& camera) {
+	camera.x = (cPos.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
+	camera.y = (cPos.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
+
+	//Keep the camera in bounds
+	if (camera.x < 0)
+	{
+		camera.x = 0;
+	}
+	if (camera.y < 0)
+	{
+		camera.y = 0;
+	}
+	if (camera.x > LEVEL_WIDTH - camera.w)
+	{
+		camera.x = LEVEL_WIDTH - camera.w;
+	}
+	if (camera.y > LEVEL_HEIGHT - camera.h)
+	{
+		camera.y = LEVEL_HEIGHT - camera.h;
+	}
+}
+
+void Char::render(SDL_Rect& camera) {
+	gCharTexture.render(cPos.x - camera.x, cPos.y - camera.y);
+}
+
 
 
 SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
@@ -124,6 +209,7 @@ SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 	SDL_FreeSurface(surface);
 	return texture;
 }
+
 
 
 bool setTiles(Tile *tiles[]) {
@@ -181,6 +267,23 @@ bool setTiles(Tile *tiles[]) {
 	}
 	map.close();
 	return tilesLoaded;
+}
+
+bool loadMedia(Tile* tiles[]) {
+	bool success = true;
+	if (!gCharTexture.loadFromFile("images/sprite.bmp")) {
+		printf("failed to load sprite sheet");
+		success = false;
+	}
+	if (!gTileTexture.loadFromFile("images/grass.bmp")) {
+		printf("failed to load tile");
+		success = false;
+	}
+	if (!setTiles(tiles)) {
+		printf("fail");
+		success = false;
+	}
+	return success;
 }
 
 bool checkCollision(SDL_Rect a, SDL_Rect b)
@@ -291,16 +394,24 @@ int main(int argc, char* args[]) {
 		playerRect.x = playerRect.y = 0;
 		playerRect.w = frameWidth;
 		playerRect.h = frameHeight;
-		//Set Background color
-		SDL_SetRenderDrawColor(renderTarget, 0xFD, 0, 0, 0xFD);
+		
 
 		Tile* tileSet[TOTAL_TILES];
 
 		bool isRunning = true;
 		SDL_Event e;
+		if (!loadMedia(tileSet))
+		{
+			printf("Failed to load media!\n");
+		}
+		else
+		{
+			SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+			Char character;
 
 		while (isRunning)
 		{
+			
 			prevTime = currentTime;
 			currentTime = SDL_GetTicks();
 			deltaTime = (currentTime - prevTime) / 1000.0f;
@@ -352,23 +463,34 @@ int main(int argc, char* args[]) {
 				}
 			}
 
-
+			
+			
+			//SDL_RenderClear(renderTarget);
+			//SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
+			SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderTarget);
+
+			for (int i = 0; i < TOTAL_TILES; i++)
+			{
+				tileSet[i]->render(camera);
+				
+			}
 			SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
 			SDL_RenderPresent(renderTarget);
 		}
-		SDL_DestroyWindow(window);
-		SDL_DestroyTexture(currentImage);
-		SDL_DestroyRenderer(renderTarget);
-		window = nullptr;
-		currentImage = nullptr;
-		renderTarget = nullptr;
-
-		SDL_Quit();
-
-		return 0;
 	}
-	
+	SDL_DestroyWindow(window);
+	SDL_DestroyTexture(currentImage);
+	SDL_DestroyRenderer(renderTarget);
+	window = nullptr;
+	currentImage = nullptr;
+	renderTarget = nullptr;
+
+	SDL_Quit();
+
+		
+	}
+	return 0;
 }
 
 
