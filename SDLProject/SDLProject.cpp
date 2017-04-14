@@ -151,47 +151,11 @@ SDL_Rect Tile::getBox()
 	return tBox;
 }
 
-Char::Char() {
-
-	cPos.x = 0;
-	cPos.y = 430;
-	cPos.w = CHAR_WIDTH;
-	cPos.h = CHAR_HEIGHT;
 
 
-	cBox.x = cBox.y = 0;
 
 
-	charPosx = 0;
-	charPosy = 0;
-}
 
-void Char::setCamera(SDL_Rect& camera) {
-	camera.x = (cPos.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
-	camera.y = (cPos.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
-
-	//Keep the camera in bounds
-	if (camera.x < 0)
-	{
-		camera.x = 0;
-	}
-	if (camera.y < 0)
-	{
-		camera.y = 0;
-	}
-	if (camera.x > LEVEL_WIDTH - camera.w)
-	{
-		camera.x = LEVEL_WIDTH - camera.w;
-	}
-	if (camera.y > LEVEL_HEIGHT - camera.h)
-	{
-		camera.y = LEVEL_HEIGHT - camera.h;
-	}
-}
-
-void Char::render(SDL_Rect& camera) {
-	gCharTexture.render(cPos.x - camera.x, cPos.y - camera.y);
-}
 
 
 
@@ -407,7 +371,6 @@ int main(int argc, char* args[]) {
 		else
 		{
 			SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-			Char character;
 
 		while (isRunning)
 		{
