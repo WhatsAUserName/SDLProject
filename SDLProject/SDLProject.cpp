@@ -264,6 +264,11 @@ bool setTiles(Tile *tiles[]) {
 			gTileClips[TILE_GRASS].y = 0;
 			gTileClips[TILE_GRASS].w = TILE_WIDTH;
 			gTileClips[TILE_GRASS].h = TILE_HEIGHT;
+			gTileClips[TILE_BRICK].x = 0;
+			gTileClips[TILE_BRICK].y = 80;
+			gTileClips[TILE_BRICK].w = TILE_WIDTH;
+			gTileClips[TILE_BRICK].h = TILE_HEIGHT;
+
 		}
 	}
 	map.close();
@@ -276,7 +281,7 @@ bool loadMedia(Tile* tiles[]) {
 		printf("failed to load sprite sheet");
 		success = false;
 	}
-	if (!gTileTexture.loadFromFile("images/grass.bmp")) {
+	if (!gTileTexture.loadFromFile("images/tile.bmp")) {
 		printf("failed to load tile");
 		success = false;
 	}

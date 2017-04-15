@@ -23,10 +23,11 @@ const int CHAR_HEIGHT = 50;
 const int TILE_WIDTH = 80;
 const int TILE_HEIGHT = 80;
 const int TOTAL_TILES = 48;
-const int TOTAL_TILE_SPRITES = 2;
+const int TOTAL_TILE_SPRITES = 3;
 
 
 const int TILE_GRASS = 1;
+const int TILE_BRICK = 2;
 
 const int FPS = 60;
 const Uint8 *keyState;
