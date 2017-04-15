@@ -20,9 +20,9 @@ const int LEVEL_HEIGHT = 480;
 const int CHAR_WIDTH = 32;
 const int CHAR_HEIGHT = 50;
 
-const int TILE_WIDTH = 80;
-const int TILE_HEIGHT = 80;
-const int TOTAL_TILES = 48;
+const int TILE_WIDTH = 32;
+const int TILE_HEIGHT = 32;
+const int TOTAL_TILES = 300;
 const int TOTAL_TILE_SPRITES = 3;
 
 

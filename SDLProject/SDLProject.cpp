@@ -155,7 +155,25 @@ SDL_Rect Tile::getBox()
 
 
 
+bool touchGround(SDL_Rect box, Tile* tiles[])
+{
+	//Go through the tiles
+	for (int i = 0; i < TOTAL_TILES; ++i)
+	{
+		//If the tile is a wall type tile
+		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= 3))
+		{
+			//If the collision box touches the wall tile
+			if (checkCollision(box, tiles[i]->getBox()))
+			{
+				return true;
+			}
+		}
+	}
 
+	//If no wall tiles were touched
+	return false;
+}
 
 
 
@@ -466,8 +484,13 @@ int main(int argc, char* args[]) {
 					playerRect.x = 0;
 				}
 			}
-
 			
+			while(touchGround(playerPos, tileSet)) 
+			{
+				playerPos.y -= 1;
+				
+			}
+						
 			//SDL_RenderClear(renderTarget);
 			//SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
 			SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -477,7 +500,7 @@ int main(int argc, char* args[]) {
 			{
 				tileSet[i]->render(camera);
 			}
-
+			
 			SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
 			SDL_RenderPresent(renderTarget);
 		}
