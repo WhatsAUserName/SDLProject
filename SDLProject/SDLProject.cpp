@@ -192,7 +192,7 @@ SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 	return texture;
 }
 
-Dot::Dot()
+Char::Char()
 {
 	//Initialize the collision box
 	mBox.x = 0;
@@ -205,7 +205,7 @@ Dot::Dot()
 	mVelY = 0;
 }
 
-void Dot::setCamera(SDL_Rect& camera)
+void Char::setCamera(SDL_Rect& camera)
 {
 	//Center the camera over the dot
 	camera.x = (mBox.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
@@ -381,7 +381,6 @@ bool init() {
 
 int main(int argc, char* args[]) {
 
-	
 	const int FPS = 60;
 	float frameTime = 0;
 	int prevTime = 0;
@@ -456,13 +455,6 @@ int main(int argc, char* args[]) {
 				playerRect.y = 50;
 				playerPos.x -= movSpeed *deltaTime;
 			}
-			/*else if (keyState[SDL_SCANCODE_UP]) {
-				playerRect.y = 150;
-				playerPos.y -= movSpeed *deltaTime;
-			}
-			else if (keyState[SDL_SCANCODE_DOWN]) {
-				playerRect.y = 0;
-				playerPos.y += movSpeed *deltaTime;*/
 			else if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
 				jumping = true;
 			}
@@ -470,26 +462,28 @@ int main(int argc, char* args[]) {
 				playerPos.y -= jumpvel;
 				jumpvel -= gravity;
 			}
-			if (playerPos.y == groundlevel) {
+			if (touchGround(playerPos, tileSet)) {
 				jumpvel = 5;
 				jumping = false;
+			}
+			while (touchGround(playerPos, tileSet))
+			{
+				playerPos.y -= 1;
 			}
 			frameTime += deltaTime;
 			if (frameTime >= 0.25f)
 			{
-				frameTime = 0;
-				playerRect.x += frameWidth;
-				if (playerRect.x >= textureWidth)
-				{
-					playerRect.x = 0;
+				if ((keyState[SDL_SCANCODE_RIGHT]) || (keyState[SDL_SCANCODE_LEFT])) {
+					frameTime = 0;
+					playerRect.x += frameWidth;
+					if (playerRect.x >= textureWidth)
+					{
+						playerRect.x = 0;
+					}
 				}
 			}
 			
-			while(touchGround(playerPos, tileSet)) 
-			{
-				playerPos.y -= 1;
-				
-			}
+			
 						
 			//SDL_RenderClear(renderTarget);
 			//SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);

@@ -40,20 +40,14 @@ private:
 };
 
 
-class Dot
+class Char
 {
 public:
-	
-
-	
-
 	//Initializes the variables
-	Dot();
+	Char();
 
-	
 	//Centers the camera over the dot
 	void setCamera(SDL_Rect& camera);
-
 
 private:
 	//Collision box of the dot
