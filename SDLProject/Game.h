@@ -46,14 +46,14 @@ public:
 	//Initializes the variables
 	Char();
 
-	//Centers the camera over the dot
+	//Centers the camera
 	void setCamera(SDL_Rect& camera);
 
 private:
-	//Collision box of the dot
+	//Collision box
 	SDL_Rect mBox;
 
-	//The velocity of the dot
+	//The velocity 
 	int mVelX, mVelY;
 };
 

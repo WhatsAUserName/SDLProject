@@ -167,10 +167,10 @@ bool touchGround(SDL_Rect box, Tile* tiles[])
 	//Go through the tiles
 	for (int i = 0; i < TOTAL_TILES; ++i)
 	{
-		//If the tile is a wall type tile
+		//If the tile is a ground type tile
 		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= TILE_BRICK))
 		{
-			//If the collision box touches the wall tile
+			//If the collision box touches the ground tile
 			if (checkTopCollision(box, tiles[i]->getBox()))
 			{
 				return true;
@@ -211,6 +211,7 @@ Char::Char()
 	mVelX = 0;
 	mVelY = 0;
 }
+
 
 void Char::setCamera(SDL_Rect& camera)
 {
@@ -531,13 +532,15 @@ int main(int argc, char* args[]) {
 	float movSpeed = 100.0f;
 	const Uint8 *keyState;
 	bool jumping = false;
-	float jumpvel = 5;
-	float gravity = 0.2f;
-	int groundlevel = 430;
+	bool falling = false;
+	float jumpvel = 15;
+	float gravity = 0.6f;
+	float air = 5;
+	const int groundlevel = 398;
 	SDL_Rect playerRect;
 	SDL_Rect playerPos;
 	playerPos.x = 0;
-	playerPos.y = 430;
+	playerPos.y = 398;
 	playerPos.w = 32;
 	playerPos.h = 50;
 	int frameWidth, frameHeight;
@@ -549,8 +552,6 @@ int main(int argc, char* args[]) {
 	}
 	else {
 
-
-
 		SDL_QueryTexture(currentImage, NULL, NULL, &textureWidth, &textureHeight);
 
 		frameWidth = textureWidth / 4;
@@ -559,6 +560,7 @@ int main(int argc, char* args[]) {
 		playerRect.x = playerRect.y = 0;
 		playerRect.w = frameWidth;
 		playerRect.h = frameHeight;
+		
 		
 
 		Tile* tileSet[TOTAL_TILES];
@@ -600,18 +602,28 @@ int main(int argc, char* args[]) {
 			else if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
 				jumping = true;
 			}
-			if (jumping) {
+			if ((jumping==true)&&(falling == false)) {
 				playerPos.y -= jumpvel;
 				jumpvel -= gravity;
 			}
 			if (touchGround(playerPos, tileSet)) {
-				jumpvel = 5;
+				jumpvel = 15;
 				jumping = false;
 			}
-			while (touchGround(playerPos, tileSet))
+			while(touchGround(playerPos, tileSet))
 			{
+				jumping = false;
 				playerPos.y -= 1;
+				printf("touching ground");
+				
 			}
+			if (playerPos.y <= groundlevel) {
+				printf("gravity");
+				playerPos.y += 5;
+			}
+			
+			
+			
 			frameTime += deltaTime;
 			if (frameTime >= 0.25f)
 			{
