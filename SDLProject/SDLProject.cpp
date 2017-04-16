@@ -30,6 +30,7 @@ bool touchGround(SDL_Rect box, Tile* tiles[]);
 
 WTexture gTileTexture;
 WTexture gCharTexture;
+WTexture gBGTexture;
 
 
 WTexture::WTexture() {
@@ -301,7 +302,7 @@ bool setTiles(Tile *tiles[]) {
 
 bool loadMedia(Tile* tiles[]) {
 	bool success = true;
-	if (!gCharTexture.loadFromFile("images/sprite.bmp")) {
+	if (!gBGTexture.loadFromFile("images/BG.jpg")) {
 		printf("failed to load sprite sheet");
 		success = false;
 	}
@@ -630,6 +631,8 @@ int main(int argc, char* args[]) {
 			//SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
 			SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderTarget);
+
+			gBGTexture.render(-600,-400);
 
 			for (int i = 0; i < TOTAL_TILES; i++)
 			{
