@@ -531,7 +531,7 @@ int main(int argc, char* args[]) {
 	int prevTime = 0;
 	int currentTime = 0;
 	float deltaTime = 0;
-	float movSpeed = 200.0f;
+	float movSpeed = 200;
 	const Uint8 *keyState;
 	bool jumping = false;
 	bool falling = false;
@@ -543,8 +543,8 @@ int main(int argc, char* args[]) {
 	SDL_Rect playerPos;
 	playerPos.x = 0;
 	playerPos.y = 398;
-	playerPos.w = 32;
-	playerPos.h = 50;
+	playerPos.w = CHAR_WIDTH;
+	playerPos.h = CHAR_HEIGHT;
 	int frameWidth, frameHeight;
 	int textureWidth, textureHeight;
 
@@ -563,7 +563,7 @@ int main(int argc, char* args[]) {
 		playerRect.w = frameWidth;
 		playerRect.h = frameHeight;
 		
-		
+		SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
 		Tile* tileSet[TOTAL_TILES];
 		bool isRunning = true;
@@ -574,7 +574,7 @@ int main(int argc, char* args[]) {
 		}
 		else
 		{
-		SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+		
 
 		while (isRunning)
 		{
@@ -604,6 +604,7 @@ int main(int argc, char* args[]) {
 			if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
 				jumping = true;
 			}
+
 			if ((jumping==true)&&(falling == false)) {
 				playerPos.y -= jumpvel;
 				jumpvel -= gravity;
@@ -638,8 +639,9 @@ int main(int argc, char* args[]) {
 			}
 
 			//setCamera(playerPos, camera);
-			camera.x = (playerPos.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
-			camera.y = (playerPos.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
+
+			/*camera.x = (playerPos.x + CHAR_WIDTH / 2) - (SCREEN_WIDTH / 2);
+			camera.y = (playerPos.y + CHAR_HEIGHT / 2) - (SCREEN_HEIGHT / 2);
 
 			if (camera.x < 0)
 			{
@@ -656,14 +658,14 @@ int main(int argc, char* args[]) {
 			if (camera.y > LEVEL_HEIGHT - camera.h)
 			{
 				camera.y = LEVEL_HEIGHT - camera.h;
-			}
+			}*/
 
 			SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderTarget);
 
 			gBGTexture.render(-600,-400);
 
-			for (int i = 0; i < TOTAL_TILES; i++)
+			for (int i = 0; i < TOTAL_TILES; ++i)
 			{
 				tileSet[i]->render(camera);
 			}

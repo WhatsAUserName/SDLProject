@@ -10,7 +10,7 @@
 #include "Game.h"
 #include <fstream>
 
-#define SCREEN_WIDTH  640
+#define SCREEN_WIDTH  1280
 #define SCREEN_HEIGHT 480
 #define SPRITE_SIZE    32
 
@@ -19,6 +19,7 @@ const int LEVEL_HEIGHT = 480;
 
 const int CHAR_WIDTH = 32;
 const int CHAR_HEIGHT = 50;
+const int CHAR_VEL = 10;
 
 const int TILE_WIDTH = 32;
 const int TILE_HEIGHT = 32;
