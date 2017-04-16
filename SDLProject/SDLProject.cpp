@@ -28,6 +28,8 @@ bool checkRightCollision(SDL_Rect a, SDL_Rect b);
 
 bool touchGround(SDL_Rect box, Tile* tiles[]);
 
+void setCamera(SDL_Rect box, SDL_Rect camera);
+
 WTexture gTileTexture;
 WTexture gCharTexture;
 WTexture gBGTexture;
@@ -213,11 +215,11 @@ Char::Char()
 }
 
 
-void Char::setCamera(SDL_Rect& camera)
+void setCamera(SDL_Rect box, SDL_Rect camera)
 {
-	//Center the camera over the dot
-	camera.x = (mBox.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
-	camera.y = (mBox.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
+	//Center the camera over the character
+	camera.x = (box.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
+	camera.y = (box.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
 
 	//Keep the camera in bounds
 	if (camera.x < 0)
@@ -246,7 +248,7 @@ bool setTiles(Tile *tiles[]) {
 
 	//Open the map
 
-	std::ifstream map("mapdata/map.txt");
+	std::ifstream map("mapdata/mapbig.txt");
 
 	if (!map.is_open()) {
 		printf("Unable to load map");
@@ -511,7 +513,7 @@ bool init() {
 		{
 			std::cout << "Error 3" << IMG_GetError() << std::endl;
 		}
-		window = SDL_CreateWindow("Try", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		window = SDL_CreateWindow("Al's Adventure", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 		renderTarget = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		currentImage = LoadTexture("images/sprite.png", renderTarget);
 		success = true;
@@ -529,7 +531,7 @@ int main(int argc, char* args[]) {
 	int prevTime = 0;
 	int currentTime = 0;
 	float deltaTime = 0;
-	float movSpeed = 100.0f;
+	float movSpeed = 200.0f;
 	const Uint8 *keyState;
 	bool jumping = false;
 	bool falling = false;
@@ -572,7 +574,7 @@ int main(int argc, char* args[]) {
 		}
 		else
 		{
-			SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+		SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
 		while (isRunning)
 		{
@@ -594,12 +596,12 @@ int main(int argc, char* args[]) {
 				playerRect.y = 100;
 				playerPos.x += movSpeed *deltaTime;
 			}
-			else if (keyState[SDL_SCANCODE_LEFT])
+			if (keyState[SDL_SCANCODE_LEFT])
 			{
 				playerRect.y = 50;
 				playerPos.x -= movSpeed *deltaTime;
 			}
-			else if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
+			if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
 				jumping = true;
 			}
 			if ((jumping==true)&&(falling == false)) {
@@ -613,9 +615,7 @@ int main(int argc, char* args[]) {
 			while(touchGround(playerPos, tileSet))
 			{
 				jumping = false;
-				playerPos.y -= 1;
-				printf("touching ground");
-				
+				playerPos.y -= 1;				
 			}
 			if (playerPos.y <= groundlevel) {
 				printf("gravity");
@@ -636,11 +636,28 @@ int main(int argc, char* args[]) {
 					}
 				}
 			}
-			
-			
-						
-			//SDL_RenderClear(renderTarget);
-			//SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
+
+			//setCamera(playerPos, camera);
+			camera.x = (playerPos.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
+			camera.y = (playerPos.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
+
+			if (camera.x < 0)
+			{
+				camera.x = 0;
+			}
+			if (camera.y < 0)
+			{
+				camera.y = 0;
+			}
+			if (camera.x > LEVEL_WIDTH - camera.w)
+			{
+				camera.x = LEVEL_WIDTH - camera.w;
+			}
+			if (camera.y > LEVEL_HEIGHT - camera.h)
+			{
+				camera.y = LEVEL_HEIGHT - camera.h;
+			}
+
 			SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderTarget);
 

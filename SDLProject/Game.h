@@ -45,10 +45,6 @@ class Char
 public:
 	//Initializes the variables
 	Char();
-
-	//Centers the camera
-	void setCamera(SDL_Rect& camera);
-
 private:
 	//Collision box
 	SDL_Rect mBox;
