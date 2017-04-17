@@ -14,6 +14,17 @@
 #define SCREEN_HEIGHT 480
 #define SPRITE_SIZE    32
 
+enum GameStates {
+	STATE_NULL,
+	STATE_TITLE,
+	STATE_ROOM1,
+	STATE_ROOM2,
+	STATE_EXIT,
+};
+
+int stateID = STATE_NULL;
+int nextState = STATE_NULL;
+
 const int LEVEL_WIDTH = 1280;
 const int LEVEL_HEIGHT = 480;
 

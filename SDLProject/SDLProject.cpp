@@ -15,7 +15,6 @@ SDL_Window *window = nullptr;
 SDL_Texture *currentImage = nullptr;
 SDL_Renderer *renderTarget = nullptr;
 
-
 bool loadMedia(Tile *tile[]);
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
@@ -31,9 +30,12 @@ bool touchGround(SDL_Rect box, Tile* tiles[]);
 void setCamera(SDL_Rect box, SDL_Rect camera);
 
 WTexture gTileTexture;
+SDL_Rect CharSpriteClip;
 WTexture gCharTexture;
 WTexture gBGTexture;
+WTexture gTitleBG;
 
+GameState* currentState = NULL;
 
 WTexture::WTexture() {
 
@@ -164,6 +166,7 @@ SDL_Rect Tile::getBox()
 
 
 
+
 bool touchGround(SDL_Rect box, Tile* tiles[])
 {
 	//Go through the tiles
@@ -213,6 +216,8 @@ Char::Char()
 	mVelX = 0;
 	mVelY = 0;
 }
+
+
 
 
 void setCamera(SDL_Rect box, SDL_Rect camera)
@@ -565,6 +570,8 @@ int main(int argc, char* args[]) {
 		
 		SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
+		Char character;
+
 		Tile* tileSet[TOTAL_TILES];
 		bool isRunning = true;
 		SDL_Event e;
@@ -590,6 +597,8 @@ int main(int argc, char* args[]) {
 				}
 
 			}
+
+
 			keyState = SDL_GetKeyboardState(NULL);
 
 			if (keyState[SDL_SCANCODE_RIGHT]) {
@@ -637,6 +646,8 @@ int main(int argc, char* args[]) {
 					}
 				}
 			}
+
+
 
 			//setCamera(playerPos, camera);
 
@@ -688,29 +699,67 @@ int main(int argc, char* args[]) {
 	return 0;
 }
 
+/*Title::Title() {
 
+	gTitleBG.loadFromFile("images/titlebg.png");
 
+}
 
+Title::~Title() {
 
-/*void Char::setCamera(SDL_Rect& camera) {
- 	camera.x = (cPos.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
- 	camera.y = (cPos.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
- 
- 	//Keep the camera in bounds
- 	if (camera.x < 0)
- 	{
- 		camera.x = 0;
- 	}
- 	if (camera.y < 0)
- 	{
- 		camera.y = 0;
- 	}
- 	if (camera.x > LEVEL_WIDTH - camera.w)
- 	{
- 		camera.x = LEVEL_WIDTH - camera.w;
- 	}
- 	if (camera.y > LEVEL_HEIGHT - camera.h)
- 	{
- 		camera.y = LEVEL_HEIGHT - camera.h;
- 	}
- }*/
+	gTitleBG.free();
+
+}
+
+void Title::handleEvents(SDL_Event&e) 
+{
+
+	while (SDL_PollEvent(&e) != 0)
+	{
+		if (e.type == SDL_QUIT)
+		{
+			setNextState(STATE_EXIT);
+		}
+		else if ((e.type == SDL_KEYDOWN) && (e.key.keysym.sym == SDLK_RETURN)) 
+		{
+			setNextState(STATE_ROOM1);
+		}
+
+	}
+}
+
+void Title::logic() {
+
+}
+
+void Title::render() {
+
+	gTitleBG.render(0,0);
+
+}
+
+void setNextState(int newState) {
+
+	if (nextState != STATE_EXIT) {
+		nextState = newState;
+	}
+
+}
+
+void changeState() {
+
+	if (nextState != STATE_NULL) {
+
+		if (nextState != STATE_EXIT) {
+
+			delete currentState;
+		}
+
+		switch (nextState)
+		{
+		case STATE_TITLE:
+			currentState = new Title();
+			break;
+		}
+	}
+	}*/
