@@ -25,11 +25,17 @@ bool checkLeftCollision(SDL_Rect a, SDL_Rect b);
 
 bool checkRightCollision(SDL_Rect a, SDL_Rect b);
 
+bool checkBottomCollision(SDL_Rect a, SDL_Rect b);
+
 bool touchGround(SDL_Rect box, Tile* tiles[]);
 
 bool touchLeftSides(SDL_Rect box, Tile* tiles[]);
 
 bool touchRightSides(SDL_Rect box, Tile* tiles[]);
+
+bool touchBottom(SDL_Rect box, Tile* tiles[]);
+
+bool touchTop(SDL_Rect box, Tile* tiles[]);
 
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip);
 
@@ -189,7 +195,7 @@ bool touchGround(SDL_Rect box, Tile* tiles[])
 		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= TILE_BRICK))
 		{
 			//If the collision box touches the ground tile
-			if (checkTopCollision(box, tiles[i]->getBox()))
+			if (checkCollision(box, tiles[i]->getBox()))
 			{
 				return true;
 			}
@@ -206,7 +212,7 @@ bool touchLeftSides(SDL_Rect box, Tile* tiles[])
 	for (int i = 0; i < TOTAL_TILES; ++i)
 	{
 		//If the tile is a ground type tile
-		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= TILE_BRICK))
+		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
 		{
 			//If the collision box touches the side of ground tile
 			if (checkLeftCollision(box, tiles[i]->getBox()))
@@ -226,7 +232,7 @@ bool touchRightSides(SDL_Rect box, Tile* tiles[])
 	for (int i = 0; i < TOTAL_TILES; ++i)
 	{
 		//If the tile is a ground type tile
-		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= TILE_BRICK))
+		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
 		{
 			//If the collision box touches the side of ground tile
 			if (checkRightCollision(box, tiles[i]->getBox()))
@@ -240,6 +246,45 @@ bool touchRightSides(SDL_Rect box, Tile* tiles[])
 	return false;
 }
 
+bool touchTop(SDL_Rect box, Tile* tiles[])
+{
+	//Go through the tiles
+	for (int i = 0; i < TOTAL_TILES; ++i)
+	{
+		//If the tile is a ground type tile
+		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
+		{
+			//If the collision box touches the side of ground tile
+			if (checkTopCollision(box, tiles[i]->getBox()))
+			{
+				return true;
+			}
+		}
+	}
+
+	//If no wall tiles were touched
+	return false;
+}
+
+bool touchBottom(SDL_Rect box, Tile* tiles[])
+{
+	//Go through the tiles
+	for (int i = 0; i < TOTAL_TILES; ++i)
+	{
+		//If the tile is a ground type tile
+		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
+		{
+			//If the collision box touches the side of ground tile
+			if (checkRightCollision(box, tiles[i]->getBox()))
+			{
+				return true;
+			}
+		}
+	}
+
+	//If no wall tiles were touched
+	return false;
+}
 
 SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 {
@@ -404,11 +449,11 @@ bool checkTopCollision(SDL_Rect a, SDL_Rect b)
 	bottomB = b.y + b.h;
 
 	//If any of the sides from A are outside of B
-	if (bottomA <= topB)
+	if (bottomA >= topB)
 	{
-		return false;
+		return true;
 	}
-	if (topA >= bottomB)
+	/*if (topA >= bottomB)
 	{
 		return false;
 	}
@@ -421,7 +466,7 @@ bool checkTopCollision(SDL_Rect a, SDL_Rect b)
 	if (leftA >= rightB)
 	{
 		return false;
-	}
+	}*/
 	
 
 
@@ -452,15 +497,15 @@ bool checkRightCollision(SDL_Rect a, SDL_Rect b)
 	//If any of the sides from A are outside of B
 	
 
-	if (rightA <= leftB)
+	if (rightA >= leftB)
 	{
-		return false;
+		return true;
 	}
 
 	
 
 	//If none of the sides from A are outside B
-	return true;
+	return false;
 }
 
 bool checkLeftCollision(SDL_Rect a, SDL_Rect b)
@@ -485,14 +530,46 @@ bool checkLeftCollision(SDL_Rect a, SDL_Rect b)
 
 	//If any of the sides from A are outside of B
 
-	if (leftA >= rightB)
+	if (leftA <= rightB)
 	{
-		return false;
+		return true;
 	}
 
 	//If none of the sides from A are outside B
-	return true;
+	return false;
 }
+
+bool checkBottomCollision(SDL_Rect a, SDL_Rect b)
+{
+	//The sides of the rectangles
+	int leftA, leftB;
+	int rightA, rightB;
+	int topA, topB;
+	int bottomA, bottomB;
+
+	//Calculate the sides of rect A
+	leftA = a.x;
+	rightA = a.x + a.w;
+	topA = a.y;
+	bottomA = a.y + a.h;
+
+	//Calculate the sides of rect B
+	leftB = b.x;
+	rightB = b.x + b.w;
+	topB = b.y;
+	bottomB = b.y + b.h;
+
+	//If any of the sides from A are outside of B
+
+	if (topA >= bottomB)
+	{
+		return true;
+	}
+
+	//If none of the sides from A are outside B
+	return false;
+}
+
 
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
 
@@ -636,26 +713,19 @@ int main(int argc, char* args[]) {
 				jumpvel = 15;
 				jumping = false;
 			}
-			if(touchLeftSides(playerPos, tileSet))
-			{
-				playerPos.x -= 2;
-
-			}
-			if (touchRightSides(playerPos, tileSet))
-			{
-				playerPos.x += 2;
-			}
+			
 			while(touchGround(playerPos, tileSet))
 			{
 				jumping = false;
-				playerPos.y -= 1;				
+				playerPos.y -= 1;
+				
 			}
+
+
 			if (playerPos.y <= groundlevel) {
 				//printf("gravity");
 				playerPos.y += 5;
 			}
-			
-			
 			
 			
 			frameTime += deltaTime;
