@@ -42,68 +42,32 @@ private:
 	int mType;
 };
 
-class Char {
-public:
-	Char();
-
-	void handleEvent(SDL_Event&e);
-
-	void move();
-
-	void render(int camX, int camY);
-
-	int getPosX();
-
-	int getPosY();
-
-private:
-
-	SDL_Rect playerPos;
-
-	int velX, velY;
-
-};
-
 
 bool init();
 
-class GameState
-{
-public:
-	 
-	
-	
-	virtual ~GameState() {};
 
-	virtual void handleEvents(SDL_Event&e) = 0;
+bool loadMedia(Tile *tile[]);
 
-	virtual void logic() = 0;
+bool checkCollision(SDL_Rect a, SDL_Rect b);
 
-	virtual void render() = 0;
-	
-};
+bool checkTopCollision(SDL_Rect a, SDL_Rect b);
 
-class Title : public GameState {
+bool checkLeftCollision(SDL_Rect a, SDL_Rect b);
 
-private:
+bool checkRightCollision(SDL_Rect a, SDL_Rect b);
 
-	Title();
-	~Title();
+bool checkBottomCollision(SDL_Rect a, SDL_Rect b);
 
-	void handleEvents(SDL_Event&e);
-	void logic();
-	void render();
-};
+bool touchGround(SDL_Rect box, Tile* tiles[]);
 
-class Room1 : public GameState {
-private:
-	Room1();
-	~Room1();
+bool touchLeftSides(SDL_Rect box, Tile* tiles[]);
 
-	void doEverything();
-};
+bool touchRightSides(SDL_Rect box, Tile* tiles[]);
 
-void setNextState(int setState);
+bool touchBottom(SDL_Rect box, Tile* tiles[]);
 
-void changeState();
+bool touchTop(SDL_Rect box, Tile* tiles[]);
+
+void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip);
+
 

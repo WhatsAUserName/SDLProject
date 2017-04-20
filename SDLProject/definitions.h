@@ -10,11 +10,11 @@
 #include "Game.h"
 #include <fstream>
 
-#define SCREEN_WIDTH  640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH  1280
+#define SCREEN_HEIGHT 960
 #define SPRITE_SIZE    32
-#define LEVEL_WIDTH 2560
-#define LEVEL_HEIGHT 480
+#define LEVEL_WIDTH 1280
+#define LEVEL_HEIGHT 960
 
 enum GameStates {
 	STATE_NULL,
