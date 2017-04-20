@@ -9,7 +9,7 @@
 #include "Game.h"
 #include "definitions.h"
 
-SDL_Rect gTileClips[TOTAL_TILE_SPRITES];
+SDL_Rect TileClips[TOTAL_TILE_SPRITES];
 
 SDL_Window *window = nullptr;
 SDL_Texture *currentImage = nullptr;
@@ -135,7 +135,7 @@ void Tile::render(SDL_Rect& camera)
 	if (checkCollision(camera, tBox))
 	{
 		//Show the tile
-		gTileTexture.render(tBox.x - camera.x, tBox.y - camera.y, &gTileClips[mType]);
+		gTileTexture.render(tBox.x - camera.x, tBox.y - camera.y, &TileClips[mType]);
 	}
 }
 
@@ -171,85 +171,6 @@ bool touchGround(SDL_Rect box, Tile* tiles[])
 	return false;
 }
 
-bool touchLeftSides(SDL_Rect box, Tile* tiles[])
-{
-	//Go through the tiles
-	for (int i = 0; i < TOTAL_TILES; ++i)
-	{
-		//If the tile is a ground type tile
-		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
-		{
-			//If the collision box touches the side of ground tile
-			if (checkLeftCollision(box, tiles[i]->getBox()))
-			{
-				return true;
-			}
-		}
-	}
-
-	//If no wall tiles were touched
-	return false;
-}
-
-bool touchRightSides(SDL_Rect box, Tile* tiles[])
-{
-	//Go through the tiles
-	for (int i = 0; i < TOTAL_TILES; ++i)
-	{
-		//If the tile is a ground type tile
-		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
-		{
-			//If the collision box touches the side of ground tile
-			if (checkRightCollision(box, tiles[i]->getBox()))
-			{
-				return true;
-			}
-		}
-	}
-
-	//If no wall tiles were touched
-	return false;
-}
-
-bool touchTop(SDL_Rect box, Tile* tiles[])
-{
-	//Go through the tiles
-	for (int i = 0; i < TOTAL_TILES; ++i)
-	{
-		//If the tile is a ground type tile
-		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
-		{
-			//If the collision box touches the side of ground tile
-			if (checkTopCollision(box, tiles[i]->getBox()))
-			{
-				return true;
-			}
-		}
-	}
-
-	//If no wall tiles were touched
-	return false;
-}
-
-bool touchBottom(SDL_Rect box, Tile* tiles[])
-{
-	//Go through the tiles
-	for (int i = 0; i < TOTAL_TILES; ++i)
-	{
-		//If the tile is a ground type tile
-		if ((tiles[i]->getType() >= TILE_BRICK) && (tiles[i]->getType() <= TILE_BRICK))
-		{
-			//If the collision box touches the side of ground tile
-			if (checkRightCollision(box, tiles[i]->getBox()))
-			{
-				return true;
-			}
-		}
-	}
-
-	//If no wall tiles were touched
-	return false;
-}
 
 SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 {
@@ -316,14 +237,14 @@ bool setTiles(Tile *tiles[]) {
 		}
 		if (tilesLoaded)
 		{
-			gTileClips[TILE_GRASS].x = 0;
-			gTileClips[TILE_GRASS].y = 0;
-			gTileClips[TILE_GRASS].w = TILE_WIDTH;
-			gTileClips[TILE_GRASS].h = TILE_HEIGHT;
-			gTileClips[TILE_BRICK].x = 0;
-			gTileClips[TILE_BRICK].y = 80;
-			gTileClips[TILE_BRICK].w = TILE_WIDTH;
-			gTileClips[TILE_BRICK].h = TILE_HEIGHT;
+			TileClips[TILE_GRASS].x = 0;
+			TileClips[TILE_GRASS].y = 0;
+			TileClips[TILE_GRASS].w = TILE_WIDTH;
+			TileClips[TILE_GRASS].h = TILE_HEIGHT;
+			TileClips[TILE_BRICK].x = 0;
+			TileClips[TILE_BRICK].y = 80;
+			TileClips[TILE_BRICK].w = TILE_WIDTH;
+			TileClips[TILE_BRICK].h = TILE_HEIGHT;
 
 		}
 	}
@@ -358,7 +279,7 @@ bool loadMedia(Tile* tiles[]) {
 
 bool checkCollision(SDL_Rect a, SDL_Rect b)
 {
-	//The sides of the rectangles
+	//initialise sides of rectangles
 	int leftA, leftB;
 	int rightA, rightB;
 	int topA, topB;
@@ -376,7 +297,7 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
 	topB = b.y;
 	bottomB = b.y + b.h;
 
-	//If any of the sides from A are outside of B
+	//If any of the sides from A are outside of B return false, no collision
 	if (bottomA <= topB)
 	{
 		return false;
@@ -397,166 +318,25 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
 		return false;
 	}
 
-	//If none of the sides from A are outside B
+	//If none of the sides from A are outside B then there was a collision
 	return true;
 }
 
-bool checkTopCollision(SDL_Rect a, SDL_Rect b)
-{
-	//The sides of the rectangles
-	int leftA, leftB;
-	int rightA, rightB;
-	int topA, topB;
-	int bottomA, bottomB;
-
-	//Calculate the sides of rect A
-	leftA = a.x;
-	rightA = a.x + a.w;
-	topA = a.y;
-	bottomA = a.y + a.h;
-
-	//Calculate the sides of rect B
-	leftB = b.x;
-	rightB = b.x + b.w;
-	topB = b.y;
-	bottomB = b.y + b.h;
-
-	//If any of the sides from A are outside of B
-	if (bottomA >= topB)
-	{
-		return true;
-	}
-	/*if (topA >= bottomB)
-	{
-		return false;
-	}
-
-	if (rightA <= leftB)
-	{
-		return false;
-	}
-
-	if (leftA >= rightB)
-	{
-		return false;
-	}*/
-	
-
-
-	//If none of the sides from A are outside B
-	//return true;
-}
-
-bool checkRightCollision(SDL_Rect a, SDL_Rect b)
-{
-	//The sides of the rectangles
-	int leftA, leftB;
-	int rightA, rightB;
-	int topA, topB;
-	int bottomA, bottomB;
-
-	//Calculate the sides of rect A
-	leftA = a.x;
-	rightA = a.x + a.w;
-	topA = a.y;
-	bottomA = a.y + a.h;
-
-	//Calculate the sides of rect B
-	leftB = b.x;
-	rightB = b.x + b.w;
-	topB = b.y;
-	bottomB = b.y + b.h;
-
-	//If any of the sides from A are outside of B
-	
-
-	if (rightA >= leftB)
-	{
-		return true;
-	}
-
-	
-
-	//If none of the sides from A are outside B
-	return false;
-}
-
-bool checkLeftCollision(SDL_Rect a, SDL_Rect b)
-{
-	//The sides of the rectangles
-	int leftA, leftB;
-	int rightA, rightB;
-	int topA, topB;
-	int bottomA, bottomB;
-
-	//Calculate the sides of rect A
-	leftA = a.x;
-	rightA = a.x + a.w;
-	topA = a.y;
-	bottomA = a.y + a.h;
-
-	//Calculate the sides of rect B
-	leftB = b.x;
-	rightB = b.x + b.w;
-	topB = b.y;
-	bottomB = b.y + b.h;
-
-	//If any of the sides from A are outside of B
-
-	if (leftA <= rightB)
-	{
-		return true;
-	}
-
-	//If none of the sides from A are outside B
-	return false;
-}
-
-bool checkBottomCollision(SDL_Rect a, SDL_Rect b)
-{
-	//The sides of the rectangles
-	int leftA, leftB;
-	int rightA, rightB;
-	int topA, topB;
-	int bottomA, bottomB;
-
-	//Calculate the sides of rect A
-	leftA = a.x;
-	rightA = a.x + a.w;
-	topA = a.y;
-	bottomA = a.y + a.h;
-
-	//Calculate the sides of rect B
-	leftB = b.x;
-	rightB = b.x + b.w;
-	topB = b.y;
-	bottomB = b.y + b.h;
-
-	//If any of the sides from A are outside of B
-
-	if (topA >= bottomB)
-	{
-		return true;
-	}
-
-	//If none of the sides from A are outside B
-	return false;
-}
 
 
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
 
-	SDL_Rect renderQuad = { x, y, CHAR_WIDTH, CHAR_HEIGHT };
+	SDL_Rect renderer = { x, y, CHAR_WIDTH, CHAR_HEIGHT };
 
 	//Set clip rendering dimensions
 	if (clip != NULL)
 	{
-		renderQuad.w = clip->w;
-		renderQuad.h = clip->h;
+		renderer.w = clip->w;
+		renderer.h = clip->h;
 	}
 
 	//Render to screen
-	SDL_RenderCopyEx(renderTarget, currentImage, clip, &renderQuad, angle, center, flip);
+	SDL_RenderCopyEx(renderTarget, currentImage, clip, &renderer, angle, center, flip);
 }
 
 
@@ -573,6 +353,7 @@ bool init() {
 		{
 			std::cout << "Error 3" << IMG_GetError() << std::endl;
 		}
+		//create window and rendering environment
 		window = SDL_CreateWindow("Al's Adventure", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 		renderTarget = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		currentImage = LoadTexture("images/sprite.png", renderTarget);
@@ -585,6 +366,8 @@ bool init() {
 
 
 int main(int argc, char* args[]) {
+	
+	//initialise local variables
 
 	const int FPS = 60;
 	float frameTime = 0;
@@ -609,6 +392,8 @@ int main(int argc, char* args[]) {
 	int textureWidth, textureHeight;
 	int lives = 1;
 	keyState = SDL_GetKeyboardState(NULL);
+
+	//set default state
 	stateID = STATE_TITLE;
 
 

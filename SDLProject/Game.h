@@ -50,23 +50,6 @@ bool loadMedia(Tile *tile[]);
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
 
-bool checkTopCollision(SDL_Rect a, SDL_Rect b);
-
-bool checkLeftCollision(SDL_Rect a, SDL_Rect b);
-
-bool checkRightCollision(SDL_Rect a, SDL_Rect b);
-
-bool checkBottomCollision(SDL_Rect a, SDL_Rect b);
-
-bool touchGround(SDL_Rect box, Tile* tiles[]);
-
-bool touchLeftSides(SDL_Rect box, Tile* tiles[]);
-
-bool touchRightSides(SDL_Rect box, Tile* tiles[]);
-
-bool touchBottom(SDL_Rect box, Tile* tiles[]);
-
-bool touchTop(SDL_Rect box, Tile* tiles[]);
 
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip);
 
