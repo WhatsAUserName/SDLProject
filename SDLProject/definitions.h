@@ -13,6 +13,8 @@
 #define SCREEN_WIDTH  1280
 #define SCREEN_HEIGHT 480
 #define SPRITE_SIZE    32
+#define LEVEL_WIDTH 2560
+#define LEVEL_HEIGHT 480
 
 enum GameStates {
 	STATE_NULL,
@@ -25,16 +27,13 @@ enum GameStates {
 int stateID = STATE_NULL;
 int nextState = STATE_NULL;
 
-const int LEVEL_WIDTH = 1280;
-const int LEVEL_HEIGHT = 480;
-
 const int CHAR_WIDTH = 32;
 const int CHAR_HEIGHT = 50;
 const int CHAR_VEL = 10;
 
 const int TILE_WIDTH = 32;
 const int TILE_HEIGHT = 32;
-const int TOTAL_TILES = 600;
+const int TOTAL_TILES = 1200;
 const int TOTAL_TILE_SPRITES = 3;
 
 

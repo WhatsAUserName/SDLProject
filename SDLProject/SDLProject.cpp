@@ -27,7 +27,11 @@ bool checkRightCollision(SDL_Rect a, SDL_Rect b);
 
 bool touchGround(SDL_Rect box, Tile* tiles[]);
 
-void setCamera(SDL_Rect box, SDL_Rect camera);
+bool touchLeftSides(SDL_Rect box, Tile* tiles[]);
+
+bool touchRightSides(SDL_Rect box, Tile* tiles[]);
+
+void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip);
 
 WTexture gTileTexture;
 SDL_Rect CharSpriteClip;
@@ -162,6 +166,15 @@ SDL_Rect Tile::getBox()
 	return tBox;
 }
 
+Char::Char() {
+	playerPos.x = 0;
+	playerPos.y = 0;
+	playerPos.w = CHAR_WIDTH;
+	playerPos.h = CHAR_HEIGHT;
+
+	velX = 0;
+	velY = 0;
+}
 
 
 
@@ -187,6 +200,45 @@ bool touchGround(SDL_Rect box, Tile* tiles[])
 	return false;
 }
 
+bool touchLeftSides(SDL_Rect box, Tile* tiles[])
+{
+	//Go through the tiles
+	for (int i = 0; i < TOTAL_TILES; ++i)
+	{
+		//If the tile is a ground type tile
+		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= TILE_BRICK))
+		{
+			//If the collision box touches the side of ground tile
+			if (checkLeftCollision(box, tiles[i]->getBox()))
+			{
+				return true;
+			}
+		}
+	}
+
+	//If no wall tiles were touched
+	return false;
+}
+
+bool touchRightSides(SDL_Rect box, Tile* tiles[])
+{
+	//Go through the tiles
+	for (int i = 0; i < TOTAL_TILES; ++i)
+	{
+		//If the tile is a ground type tile
+		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= TILE_BRICK))
+		{
+			//If the collision box touches the side of ground tile
+			if (checkRightCollision(box, tiles[i]->getBox()))
+			{
+				return true;
+			}
+		}
+	}
+
+	//If no wall tiles were touched
+	return false;
+}
 
 
 SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
@@ -204,46 +256,6 @@ SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 	return texture;
 }
 
-Char::Char()
-{
-	//Initialize the collision box
-	mBox.x = 0;
-	mBox.y = 0;
-	mBox.w = CHAR_WIDTH;
-	mBox.h = CHAR_HEIGHT;
-
-	//Initialize the velocity
-	mVelX = 0;
-	mVelY = 0;
-}
-
-
-
-
-void setCamera(SDL_Rect box, SDL_Rect camera)
-{
-	//Center the camera over the character
-	camera.x = (box.x + CHAR_WIDTH / 2) - SCREEN_WIDTH / 2;
-	camera.y = (box.y + CHAR_HEIGHT / 2) - SCREEN_HEIGHT / 2;
-
-	//Keep the camera in bounds
-	if (camera.x < 0)
-	{
-		camera.x = 0;
-	}
-	if (camera.y < 0)
-	{
-		camera.y = 0;
-	}
-	if (camera.x > LEVEL_WIDTH - camera.w)
-	{
-		camera.x = LEVEL_WIDTH - camera.w;
-	}
-	if (camera.y > LEVEL_HEIGHT - camera.h)
-	{
-		camera.y = LEVEL_HEIGHT - camera.h;
-	}
-}
 
 
 bool setTiles(Tile *tiles[]) {
@@ -253,7 +265,7 @@ bool setTiles(Tile *tiles[]) {
 
 	//Open the map
 
-	std::ifstream map("mapdata/mapbig.txt");
+	std::ifstream map("mapdata/mapbigtest.txt");
 
 	if (!map.is_open()) {
 		printf("Unable to load map");
@@ -261,6 +273,7 @@ bool setTiles(Tile *tiles[]) {
 	}
 	else
 	{
+		
 		for (int i = 0; i < TOTAL_TILES; i++)
 		{
 			int tileType = -1;
@@ -409,10 +422,11 @@ bool checkTopCollision(SDL_Rect a, SDL_Rect b)
 	{
 		return false;
 	}
+	
 
 
 	//If none of the sides from A are outside B
-	return true;
+	//return true;
 }
 
 bool checkRightCollision(SDL_Rect a, SDL_Rect b)
@@ -436,25 +450,14 @@ bool checkRightCollision(SDL_Rect a, SDL_Rect b)
 	bottomB = b.y + b.h;
 
 	//If any of the sides from A are outside of B
-	if (bottomA <= topB)
-	{
-		return false;
-	}
-
-	if (topA >= bottomB)
-	{
-		return false;
-	}
+	
 
 	if (rightA <= leftB)
 	{
 		return false;
 	}
 
-	if (leftA >= rightB)
-	{
-		return false;
-	}
+	
 
 	//If none of the sides from A are outside B
 	return true;
@@ -481,20 +484,6 @@ bool checkLeftCollision(SDL_Rect a, SDL_Rect b)
 	bottomB = b.y + b.h;
 
 	//If any of the sides from A are outside of B
-	if (bottomA <= topB)
-	{
-		return false;
-	}
-
-	if (topA >= bottomB)
-	{
-		return false;
-	}
-
-	if (rightA <= leftB)
-	{
-		return false;
-	}
 
 	if (leftA >= rightB)
 	{
@@ -504,6 +493,22 @@ bool checkLeftCollision(SDL_Rect a, SDL_Rect b)
 	//If none of the sides from A are outside B
 	return true;
 }
+
+void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
+
+	SDL_Rect renderQuad = { x, y, CHAR_WIDTH, CHAR_HEIGHT };
+
+	//Set clip rendering dimensions
+	if (clip != NULL)
+	{
+		renderQuad.w = clip->w;
+		renderQuad.h = clip->h;
+	}
+
+	//Render to screen
+	SDL_RenderCopyEx(renderTarget, currentImage, clip, &renderQuad, angle, center, flip);
+}
+
 
 
 bool init() {
@@ -536,7 +541,7 @@ int main(int argc, char* args[]) {
 	int prevTime = 0;
 	int currentTime = 0;
 	float deltaTime = 0;
-	float movSpeed = 200;
+	float movSpeed = 150;
 	const Uint8 *keyState;
 	bool jumping = false;
 	bool falling = false;
@@ -552,6 +557,7 @@ int main(int argc, char* args[]) {
 	playerPos.h = CHAR_HEIGHT;
 	int frameWidth, frameHeight;
 	int textureWidth, textureHeight;
+	int lives = 1;
 
 
 	if (!init()) {
@@ -570,7 +576,7 @@ int main(int argc, char* args[]) {
 		
 		SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
 
-		Char character;
+		
 
 		Tile* tileSet[TOTAL_TILES];
 		bool isRunning = true;
@@ -603,18 +609,26 @@ int main(int argc, char* args[]) {
 
 			if (keyState[SDL_SCANCODE_RIGHT]) {
 				playerRect.y = 100;
-				playerPos.x += movSpeed *deltaTime;
+				playerPos.x += movSpeed * deltaTime;
+				std::cout<<playerPos.x<<std::endl;
 			}
 			if (keyState[SDL_SCANCODE_LEFT])
 			{
 				playerRect.y = 50;
 				playerPos.x -= movSpeed *deltaTime;
+				std::cout << playerPos.x << std::endl;
 			}
 			if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
 				jumping = true;
 			}
+			if (keyState[SDL_SCANCODE_LSHIFT]) {
+				movSpeed = 250;
+			}
+			else if (!keyState[SDL_SCANCODE_LSHIFT]) {
+				movSpeed = 150;
+			}
 
-			if ((jumping==true)&&(falling == false)) {
+			if ((jumping==true)) {
 				playerPos.y -= jumpvel;
 				jumpvel -= gravity;
 			}
@@ -622,15 +636,25 @@ int main(int argc, char* args[]) {
 				jumpvel = 15;
 				jumping = false;
 			}
+			if(touchLeftSides(playerPos, tileSet))
+			{
+				playerPos.x -= 2;
+
+			}
+			if (touchRightSides(playerPos, tileSet))
+			{
+				playerPos.x += 2;
+			}
 			while(touchGround(playerPos, tileSet))
 			{
 				jumping = false;
 				playerPos.y -= 1;				
 			}
 			if (playerPos.y <= groundlevel) {
-				printf("gravity");
+				//printf("gravity");
 				playerPos.y += 5;
 			}
+			
 			
 			
 			
@@ -647,29 +671,9 @@ int main(int argc, char* args[]) {
 				}
 			}
 
+			
 
-
-			//setCamera(playerPos, camera);
-
-			/*camera.x = (playerPos.x + CHAR_WIDTH / 2) - (SCREEN_WIDTH / 2);
-			camera.y = (playerPos.y + CHAR_HEIGHT / 2) - (SCREEN_HEIGHT / 2);
-
-			if (camera.x < 0)
-			{
-				camera.x = 0;
-			}
-			if (camera.y < 0)
-			{
-				camera.y = 0;
-			}
-			if (camera.x > LEVEL_WIDTH - camera.w)
-			{
-				camera.x = LEVEL_WIDTH - camera.w;
-			}
-			if (camera.y > LEVEL_HEIGHT - camera.h)
-			{
-				camera.y = LEVEL_HEIGHT - camera.h;
-			}*/
+			
 
 			SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(renderTarget);
@@ -680,9 +684,11 @@ int main(int argc, char* args[]) {
 			{
 				tileSet[i]->render(camera);
 			}
-			
+			//render(playerPos.x - camera.x , playerPos.y - camera.y);
 			SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
 			SDL_RenderPresent(renderTarget);
+
+			
 		}
 	}
 	SDL_DestroyWindow(window);

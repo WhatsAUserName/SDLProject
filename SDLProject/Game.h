@@ -42,24 +42,28 @@ private:
 	int mType;
 };
 
-
-class Char
-{
+class Char {
 public:
-	//Initializes the variables
 	Char();
 
-	//void setCamera(SDL_Rect&camera);
+	void handleEvent(SDL_Event&e);
 
-	//void render(SDL_Rect&camera);
+	void move();
+
+	void render(int camX, int camY);
+
+	int getPosX();
+
+	int getPosY();
 
 private:
-	//Collision box
-	SDL_Rect mBox;
 
-	//The velocity 
-	int mVelX, mVelY;
+	SDL_Rect playerPos;
+
+	int velX, velY;
+
 };
+
 
 bool init();
 
