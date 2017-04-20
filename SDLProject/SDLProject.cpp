@@ -1,5 +1,5 @@
 // SDLProject.cpp : Defines the entry point for the console application.
-//TODO Add gravity, and jumping state.
+
 
 #include "stdafx.h"
 #include <string>
@@ -539,6 +539,11 @@ int main(int argc, char* args[]) {
 	SDL_DestroyWindow(window);
 	SDL_DestroyTexture(currentImage);
 	SDL_DestroyRenderer(renderTarget);
+	gBGTexture.free();
+	gCharTexture.free();
+	gGameOver.free();
+	gTileTexture.free();
+	gTitleBG.free();
 	window = nullptr;
 	currentImage = nullptr;
 	renderTarget = nullptr;
