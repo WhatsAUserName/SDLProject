@@ -10,7 +10,7 @@
 #include "Game.h"
 #include <fstream>
 
-#define SCREEN_WIDTH  1280
+#define SCREEN_WIDTH  640
 #define SCREEN_HEIGHT 480
 #define SPRITE_SIZE    32
 #define LEVEL_WIDTH 2560

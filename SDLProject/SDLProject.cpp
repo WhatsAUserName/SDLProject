@@ -44,6 +44,7 @@ SDL_Rect CharSpriteClip;
 WTexture gCharTexture;
 WTexture gBGTexture;
 WTexture gTitleBG;
+WTexture gGameOver;
 
 GameState* currentState = NULL;
 
@@ -369,7 +370,15 @@ bool setTiles(Tile *tiles[]) {
 bool loadMedia(Tile* tiles[]) {
 	bool success = true;
 	if (!gBGTexture.loadFromFile("images/BG.jpg")) {
-		printf("failed to load sprite sheet");
+		printf("failed to load background image");
+		success = false;
+	}
+	if (!gTitleBG.loadFromFile("images/title1.png")) {
+		printf("failed to load title image");
+		success = false;
+	}
+	if (!gGameOver.loadFromFile("images/gameover.png")) {
+		printf("failed to load title image");
 		success = false;
 	}
 	if (!gTileTexture.loadFromFile("images/tile.bmp")) {
@@ -625,7 +634,7 @@ int main(int argc, char* args[]) {
 	float jumpvel = 15;
 	float gravity = 0.6f;
 	float air = 5;
-	const int groundlevel = 398;
+	const int groundlevel = 430;
 	SDL_Rect playerRect;
 	SDL_Rect playerPos;
 	playerPos.x = 0;
@@ -635,6 +644,8 @@ int main(int argc, char* args[]) {
 	int frameWidth, frameHeight;
 	int textureWidth, textureHeight;
 	int lives = 1;
+	keyState = SDL_GetKeyboardState(NULL);
+	stateID = STATE_TITLE;
 
 
 	if (!init()) {
@@ -668,97 +679,137 @@ int main(int argc, char* args[]) {
 
 		while (isRunning)
 		{
-			
-			prevTime = currentTime;
-			currentTime = SDL_GetTicks();
-			deltaTime = (currentTime - prevTime) / 1000.0f;
-			while (SDL_PollEvent(&e) != 0)
-			{
-				if (e.type == SDL_QUIT)
+
+			//switch (stateID) {
+			//case STATE_TITLE: 
+				//if (keyState[SDL_SCANCODE_SPACE]) {
+					//stateID = STATE_ROOM1;
+				//}
+				//break;
+
+			//case STATE_ROOM1:
+
+
+				prevTime = currentTime;
+				currentTime = SDL_GetTicks();
+				deltaTime = (currentTime - prevTime) / 1000.0f;
+				while (SDL_PollEvent(&e) != 0)
 				{
-					isRunning = false;
+					if (e.type == SDL_QUIT)
+					{
+						isRunning = false;
+					}
+
 				}
 
-			}
+
+				if (keyState[SDL_SCANCODE_RIGHT]) {
+					playerRect.y = 100;
+					playerPos.x += movSpeed * deltaTime;
+					std::cout << playerPos.x << std::endl;
+				}
+				if (keyState[SDL_SCANCODE_LEFT])
+				{
+					playerRect.y = 50;
+					playerPos.x -= movSpeed *deltaTime;
+					std::cout << playerPos.x << std::endl;
+				}
+				if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
+					jumping = true;
+				}
+				if (keyState[SDL_SCANCODE_LSHIFT]) {
+					movSpeed = 250;
+				}
+				else if (!keyState[SDL_SCANCODE_LSHIFT]) {
+					movSpeed = 150;
+				}
+
+				if ((jumping == true)) {
+					playerPos.y -= jumpvel;
+					jumpvel -= gravity;
+				}
+				if (touchGround(playerPos, tileSet)) {
+					jumpvel = 15;
+					jumping = false;
+				}
+
+				while (touchGround(playerPos, tileSet))
+				{
+					jumping = false;
+					playerPos.y -= 1;
+
+				}
 
 
-			keyState = SDL_GetKeyboardState(NULL);
-
-			if (keyState[SDL_SCANCODE_RIGHT]) {
-				playerRect.y = 100;
-				playerPos.x += movSpeed * deltaTime;
-				std::cout<<playerPos.x<<std::endl;
-			}
-			if (keyState[SDL_SCANCODE_LEFT])
-			{
-				playerRect.y = 50;
-				playerPos.x -= movSpeed *deltaTime;
-				std::cout << playerPos.x << std::endl;
-			}
-			if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
-				jumping = true;
-			}
-			if (keyState[SDL_SCANCODE_LSHIFT]) {
-				movSpeed = 250;
-			}
-			else if (!keyState[SDL_SCANCODE_LSHIFT]) {
-				movSpeed = 150;
-			}
-
-			if ((jumping==true)) {
-				playerPos.y -= jumpvel;
-				jumpvel -= gravity;
-			}
-			if (touchGround(playerPos, tileSet)) {
-				jumpvel = 15;
-				jumping = false;
-			}
-			
-			while(touchGround(playerPos, tileSet))
-			{
-				jumping = false;
-				playerPos.y -= 1;
-				
-			}
+				if (playerPos.y <= groundlevel) {
+					//printf("gravity");
+					playerPos.y += 5;
+				}
+				if (playerPos.y > 430) {
+					stateID = STATE_NULL;
+				}
 
 
-			if (playerPos.y <= groundlevel) {
-				//printf("gravity");
-				playerPos.y += 5;
-			}
-			
-			
-			frameTime += deltaTime;
-			if (frameTime >= 0.25f)
-			{
-				if ((keyState[SDL_SCANCODE_RIGHT]) || (keyState[SDL_SCANCODE_LEFT])) {
-					frameTime = 0;
-					playerRect.x += frameWidth;
-					if (playerRect.x >= textureWidth)
-					{
-						playerRect.x = 0;
+				frameTime += deltaTime;
+				if (frameTime >= 0.25f)
+				{
+					if ((keyState[SDL_SCANCODE_RIGHT]) || (keyState[SDL_SCANCODE_LEFT])) {
+						frameTime = 0;
+						playerRect.x += frameWidth;
+						if (playerRect.x >= textureWidth)
+						{
+							playerRect.x = 0;
+						}
 					}
 				}
-			}
 
-			
 
-			
 
-			SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
-			SDL_RenderClear(renderTarget);
 
-			gBGTexture.render(-600,-400);
 
-			for (int i = 0; i < TOTAL_TILES; ++i)
-			{
-				tileSet[i]->render(camera);
-			}
-			//render(playerPos.x - camera.x , playerPos.y - camera.y);
-			SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
-			SDL_RenderPresent(renderTarget);
+				
 
-			
+				switch (stateID) {
+				case STATE_TITLE: 
+					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
+					SDL_RenderClear(renderTarget);
+					gTitleBG.render(0, 0);
+					SDL_RenderPresent(renderTarget);
+					if (keyState[SDL_SCANCODE_SPACE]) {
+						stateID = STATE_ROOM1;
+					}
+					break;
+				case STATE_ROOM1:
+					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
+					SDL_RenderClear(renderTarget);
+					gBGTexture.render(-600, -400);
+
+					for (int i = 0; i < TOTAL_TILES; ++i)
+					{
+						tileSet[i]->render(camera);
+					}
+					//render(playerPos.x - camera.x , playerPos.y - camera.y);
+					SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
+					SDL_RenderPresent(renderTarget);
+					break;
+				case STATE_NULL:
+					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
+					SDL_RenderClear(renderTarget);
+					gGameOver.render(0, 0);
+					SDL_RenderPresent(renderTarget);
+					playerPos.x = 0;
+					playerPos.y = 398;
+					if (keyState[SDL_SCANCODE_ESCAPE]) {
+						stateID = STATE_TITLE;
+					}
+					break;
+
+				}
+				
+				
+					
+				
+			//}
 		}
 	}
 	SDL_DestroyWindow(window);
