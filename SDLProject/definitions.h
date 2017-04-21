@@ -34,11 +34,12 @@ const int CHAR_VEL = 10;
 const int TILE_WIDTH = 32;
 const int TILE_HEIGHT = 32;
 const int TOTAL_TILES = 1200;
-const int TOTAL_TILE_SPRITES = 3;
+const int TOTAL_TILE_SPRITES = 4;
 
 
 const int TILE_GRASS = 1;
 const int TILE_BRICK = 2;
+const int TILE_GOLD = 3;
 
 const int FPS = 60;
 const Uint8 *keyState;

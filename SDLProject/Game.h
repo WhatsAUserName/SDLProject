@@ -50,6 +50,7 @@ bool loadMedia(Tile *tile[]);
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
 
+bool touchGoal(SDL_Rect box, Tile *tiles[]);
 
 void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip);
 

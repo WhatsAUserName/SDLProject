@@ -21,6 +21,7 @@ WTexture gCharTexture;
 WTexture gBGTexture;
 WTexture gTitleBG;
 WTexture gGameOver;
+WTexture gWinBG;
 
 
 
@@ -171,6 +172,26 @@ bool touchGround(SDL_Rect box, Tile* tiles[])
 	return false;
 }
 
+bool touchGoal(SDL_Rect box, Tile* tiles[])
+{
+	//Go through the tiles
+	for (int i = 0; i < TOTAL_TILES; ++i)
+	{
+		//If the tile is a ground type tile
+		if ((tiles[i]->getType() >= TILE_GOLD) && (tiles[i]->getType() <= TILE_GOLD))
+		{
+			//If the collision box touches the ground tile
+			if (checkCollision(box, tiles[i]->getBox()))
+			{
+				return true;
+			}
+		}
+	}
+
+	//If no wall tiles were touched
+	return false;
+}
+
 
 SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 {
@@ -245,7 +266,10 @@ bool setTiles(Tile *tiles[]) {
 			TileClips[TILE_BRICK].y = 80;
 			TileClips[TILE_BRICK].w = TILE_WIDTH;
 			TileClips[TILE_BRICK].h = TILE_HEIGHT;
-
+			TileClips[TILE_GOLD].x = 0;
+			TileClips[TILE_GOLD].y = 160;
+			TileClips[TILE_GOLD].w = TILE_WIDTH;
+			TileClips[TILE_GOLD].h = TILE_HEIGHT;
 		}
 	}
 	map.close();
@@ -266,7 +290,11 @@ bool loadMedia(Tile* tiles[]) {
 		printf("failed to load title image");
 		success = false;
 	}
-	if (!gTileTexture.loadFromFile("images/tile.bmp")) {
+	if (!gWinBG.loadFromFile("images/win.png")) {
+		printf("failed to load title image");
+		success = false;
+	}
+	if (!gTileTexture.loadFromFile("images/tiles.png")) {
 		printf("failed to load tile");
 		success = false;
 	}
@@ -475,7 +503,9 @@ int main(int argc, char* args[]) {
 						playerPos.y -= 1;
 
 					}
-
+					if (touchGoal(playerPos, tileSet)) {
+						stateID = STATE_ROOM2;
+					}
 
 					if (playerPos.y <= groundlevel) {
 						//printf("gravity");
@@ -521,34 +551,53 @@ int main(int argc, char* args[]) {
 					SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
 					SDL_RenderPresent(renderTarget);
 					break;
+				case STATE_ROOM2:
+					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
+					SDL_RenderClear(renderTarget);
+					gWinBG.render(0, 0);
+					SDL_RenderPresent(renderTarget);
+					if (keyState[SDL_SCANCODE_ESCAPE]) {
+						stateID = STATE_EXIT;
+					}
+					if (keyState[SDL_SCANCODE_SPACE]) {
+						playerPos.x = 0;
+						playerPos.y = groundlevel - TILE_HEIGHT;
+						stateID = STATE_TITLE;
+					}
+					break;
 				case STATE_NULL:
 					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 					SDL_RenderClear(renderTarget);
 					gGameOver.render(0, 0);
 					SDL_RenderPresent(renderTarget);
 					playerPos.x = 0;
-					playerPos.y = 878;
-					if (keyState[SDL_SCANCODE_ESCAPE]) {
+					playerPos.y = groundlevel - TILE_HEIGHT;
+					if (keyState[SDL_SCANCODE_SPACE]) {
 						stateID = STATE_TITLE;
 					}
+					if (keyState[SDL_SCANCODE_ESCAPE]) {
+						stateID = STATE_EXIT;
+					}
 					break;
+				case STATE_EXIT:
+					SDL_DestroyWindow(window);
+					SDL_DestroyTexture(currentImage);
+					SDL_DestroyRenderer(renderTarget);
+					gBGTexture.free();
+					gCharTexture.free();
+					gGameOver.free();
+					gTileTexture.free();
+					gTitleBG.free();
+					window = nullptr;
+					currentImage = nullptr;
+					renderTarget = nullptr;
 
+					SDL_Quit();
+					break;
 				}
 		}
 	}
-	SDL_DestroyWindow(window);
-	SDL_DestroyTexture(currentImage);
-	SDL_DestroyRenderer(renderTarget);
-	gBGTexture.free();
-	gCharTexture.free();
-	gGameOver.free();
-	gTileTexture.free();
-	gTitleBG.free();
-	window = nullptr;
-	currentImage = nullptr;
-	renderTarget = nullptr;
-
-	SDL_Quit();
+	
 
 		
 	}
