@@ -9,6 +9,7 @@
 #include "Game.h"
 #include "definitions.h"
 
+//Initialise everything to be used later
 SDL_Rect TileClips[TOTAL_TILE_SPRITES];
 
 SDL_Window *window = nullptr;
@@ -43,25 +44,23 @@ WTexture::~WTexture() {
 bool WTexture::loadFromFile(std::string filepath) {
 	free();
 
-	//The final texture
+	//This will be the final texture
 	SDL_Texture* newTexture = NULL;
 
 	//Load image at specified path
 	SDL_Surface* loadedSurface = IMG_Load(filepath.c_str());
 	if (loadedSurface == NULL)
 	{
-		printf("Unable to load image %s! SDL_image Error: %s\n", filepath.c_str(), IMG_GetError());
+		std::cout << "Unable to load image %s! SDL_image Error: %s\n" << filepath.c_str() << IMG_GetError() << std::endl;
 	}
 	else
 	{
-		//Color key image
-		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
-
-		//Create texture from surface pixels
+		
+		//Create texture from the surface 
 		newTexture = SDL_CreateTextureFromSurface(renderTarget, loadedSurface);
 		if (newTexture == NULL)
 		{
-			printf("Unable to create texture from %s! SDL Error: %s\n", filepath.c_str(), SDL_GetError());
+			std::cout << "Unable to create texture from %s! SDL Error: %s\n" << filepath.c_str() << SDL_GetError() << std::endl;
 		}
 		else
 		{
@@ -69,15 +68,11 @@ bool WTexture::loadFromFile(std::string filepath) {
 			mWidth = loadedSurface->w;
 			mHeight = loadedSurface->h;
 		}
-
-		//Get rid of old loaded surface
+		//Free old surface
 		SDL_FreeSurface(loadedSurface);
 	}
-
-	//Return success
 	texture = newTexture;
 	return texture != NULL;
-
 }
 
 void WTexture::free() {
@@ -91,17 +86,12 @@ void WTexture::free() {
 
 void WTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
 {
-	//Set rendering space and render to screen
 	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
-
-	//Set clip rendering dimensions
 	if (clip != NULL)
 	{
 		renderQuad.w = clip->w;
 		renderQuad.h = clip->h;
 	}
-
-	//Render to screen
 	SDL_RenderCopyEx(renderTarget, texture, clip, &renderQuad, angle, center, flip);
 }
 
@@ -114,40 +104,39 @@ int WTexture::getHeight() {
 	return mHeight;
 }
 
-bool setTiles(Tile* tiles[]);
+
 
 Tile::Tile(int x, int y, int tileType)
 {
-	//Get the offsets
-	tBox.x = x;
-	tBox.y = y;
+	tileBox.x = x;
+	tileBox.y = y;
 
 	//Set the collision box
-	tBox.w = TILE_WIDTH;
-	tBox.h = TILE_HEIGHT;
+	tileBox.w = TILE_WIDTH;
+	tileBox.h = TILE_HEIGHT;
 
 	//Get the tile type
-	mType = tileType;
+	tType = tileType;
 }
 
 void Tile::render(SDL_Rect& camera)
 {
 	//If the tile is on screen
-	if (checkCollision(camera, tBox))
+	if (checkCollision(camera, tileBox))
 	{
 		//Show the tile
-		gTileTexture.render(tBox.x - camera.x, tBox.y - camera.y, &TileClips[mType]);
+		gTileTexture.render(tileBox.x - camera.x, tileBox.y - camera.y, &TileClips[tType]);
 	}
 }
 
 int Tile::getType()
 {
-	return mType;
+	return tType;
 }
 
-SDL_Rect Tile::getBox()
+SDL_Rect Tile::getTileBox()
 {
-	return tBox;
+	return tileBox;
 }
 
 
@@ -157,42 +146,36 @@ bool touchGround(SDL_Rect box, Tile* tiles[])
 	//Go through the tiles
 	for (int i = 0; i < TOTAL_TILES; ++i)
 	{
-		//If the tile is a ground type tile
+		//If the tile is a ground tile
 		if ((tiles[i]->getType() >= TILE_GRASS) && (tiles[i]->getType() <= TILE_BRICK))
 		{
-			//If the collision box touches the ground tile
-			if (checkCollision(box, tiles[i]->getBox()))
+			//If the collision box touches the ground 
+			if (checkCollision(box, tiles[i]->getTileBox()))
 			{
 				return true;
 			}
 		}
 	}
 
-	//If no wall tiles were touched
 	return false;
 }
 
 bool touchGoal(SDL_Rect box, Tile* tiles[])
 {
-	//Go through the tiles
 	for (int i = 0; i < TOTAL_TILES; ++i)
 	{
-		//If the tile is a ground type tile
 		if ((tiles[i]->getType() >= TILE_GOLD) && (tiles[i]->getType() <= TILE_GOLD))
 		{
-			//If the collision box touches the ground tile
-			if (checkCollision(box, tiles[i]->getBox()))
+			if (checkCollision(box, tiles[i]->getTileBox()))
 			{
 				return true;
 			}
 		}
 	}
-
-	//If no wall tiles were touched
 	return false;
 }
 
-
+//Used to load player sprite texture, as it is not a WTexture
 SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 {
 	SDL_Texture *texture = nullptr;
@@ -213,14 +196,15 @@ SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 bool setTiles(Tile *tiles[]) {
 	bool tilesLoaded = true;
 
-	int x = 0, y = 0;
+	int x = 0;
+	int y = 0;
 
 	//Open the map
 
 	std::ifstream map("mapdata/mapbig.txt");
 
 	if (!map.is_open()) {
-		printf("Unable to load map");
+		std::cout << "Unable to load map" << std::endl;
 		tilesLoaded = false;
 	}
 	else
@@ -230,24 +214,27 @@ bool setTiles(Tile *tiles[]) {
 		{
 			int tileType = -1;
 
+			//read the map to tileType
 			map >> tileType;
 
 			if (map.fail())
 			{
-				printf("Error loading map, end of file error");
+				std::cout << "Error loading map, end of file error" << std::endl;
 				tilesLoaded = false;
 				break;
 			}
+			//If valid map then load it to new tile
 			if ((tileType >= 0) && (tileType < TOTAL_TILE_SPRITES))
 			{
 				tiles[i] = new Tile(x, y, tileType);
 			}
 			else
 			{
-				printf("Error loading map");
+				std::cout << "Error loading map" << std::endl;
 				tilesLoaded = false;
 				break;
 			}
+			//cycle through the level width based on tile size, to set the tiles next to eachother
 			x += TILE_WIDTH;
 
 			if (x >= LEVEL_WIDTH) {
@@ -258,6 +245,7 @@ bool setTiles(Tile *tiles[]) {
 		}
 		if (tilesLoaded)
 		{
+			//clip the sprite sheet
 			TileClips[TILE_GRASS].x = 0;
 			TileClips[TILE_GRASS].y = 0;
 			TileClips[TILE_GRASS].w = TILE_WIDTH;
@@ -279,27 +267,27 @@ bool setTiles(Tile *tiles[]) {
 bool loadMedia(Tile* tiles[]) {
 	bool success = true;
 	if (!gBGTexture.loadFromFile("images/BG.jpg")) {
-		printf("failed to load background image");
+		std::cout << "failed to load background image" << std::endl;
 		success = false;
 	}
 	if (!gTitleBG.loadFromFile("images/title1.png")) {
-		printf("failed to load title image");
+		std::cout << "failed to load title image" << std::endl;
 		success = false;
 	}
 	if (!gGameOver.loadFromFile("images/gameover.png")) {
-		printf("failed to load title image");
+		std::cout << "failed to load game over image" << std::endl;
 		success = false;
 	}
 	if (!gWinBG.loadFromFile("images/win.png")) {
-		printf("failed to load title image");
+		std::cout << "failed to load win image" << std::endl;
 		success = false;
 	}
 	if (!gTileTexture.loadFromFile("images/tiles.png")) {
-		printf("failed to load tile");
+		std::cout << "failed to load tile" << std::endl;
 		success = false;
 	}
 	if (!setTiles(tiles)) {
-		printf("fail");
+		std::cout<<"fail" << std::endl;
 		success = false;
 	}
 	return success;
@@ -307,7 +295,7 @@ bool loadMedia(Tile* tiles[]) {
 
 bool checkCollision(SDL_Rect a, SDL_Rect b)
 {
-	//initialise sides of rectangles
+	//initialise sides of SDL_Rects
 	int leftA, leftB;
 	int rightA, rightB;
 	int topA, topB;
@@ -352,27 +340,11 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
 
 
 
-void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
-
-	SDL_Rect renderer = { x, y, CHAR_WIDTH, CHAR_HEIGHT };
-
-	//Set clip rendering dimensions
-	if (clip != NULL)
-	{
-		renderer.w = clip->w;
-		renderer.h = clip->h;
-	}
-
-	//Render to screen
-	SDL_RenderCopyEx(renderTarget, currentImage, clip, &renderer, angle, center, flip);
-}
-
-
 
 bool init() {
 	bool success = true;
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		printf("SDL initialisation failed, aborting");
+		std::cout<<"SDL initialisation failed, aborting" << std::endl;
 		success = false;
 	}
 	else {
@@ -426,12 +398,13 @@ int main(int argc, char* args[]) {
 
 
 	if (!init()) {
-		printf("Failed initilising");
+		std::cout<<"Failed initilising" << std::endl;
 	}
 	else {
 
+		
 		SDL_QueryTexture(currentImage, NULL, NULL, &textureWidth, &textureHeight);
-
+		//clip player sprite sheet, to prepare for animation
 		frameWidth = textureWidth / 4;
 		frameHeight = textureHeight / 4;
 
@@ -446,7 +419,7 @@ int main(int argc, char* args[]) {
 		SDL_Event e;
 		if (!loadMedia(tileSet))
 		{
-			printf("Failed to load media!\n");
+			std::cout<<"Failed to load media!\n" << std::endl;
 		}
 		else
 		{
@@ -465,18 +438,17 @@ int main(int argc, char* args[]) {
 					}
 
 				}
-
+				//Use different states to have multiple environments
 				if (stateID == STATE_ROOM1) {
+					//handle key input to move player
 					if (keyState[SDL_SCANCODE_RIGHT]) {
 						playerRect.y = 100;
 						playerPos.x += movSpeed * deltaTime;
-						std::cout << playerPos.x << std::endl;
 					}
 					if (keyState[SDL_SCANCODE_LEFT])
 					{
 						playerRect.y = 50;
 						playerPos.x -= movSpeed *deltaTime;
-						std::cout << playerPos.x << std::endl;
 					}
 					if (keyState[SDL_SCANCODE_SPACE] && !jumping) {
 						jumping = true;
@@ -508,7 +480,6 @@ int main(int argc, char* args[]) {
 					}
 
 					if (playerPos.y <= groundlevel) {
-						//printf("gravity");
 						playerPos.y += 5;
 					}
 					if (playerPos.y > groundlevel) {
@@ -529,6 +500,7 @@ int main(int argc, char* args[]) {
 						}
 					}
 				}
+				//Title screen
 				switch (stateID) {
 				case STATE_TITLE: 
 					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -539,6 +511,7 @@ int main(int argc, char* args[]) {
 						stateID = STATE_ROOM1;
 					}
 					break;
+					//Main game room
 				case STATE_ROOM1:
 					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 					SDL_RenderClear(renderTarget);
@@ -551,6 +524,7 @@ int main(int argc, char* args[]) {
 					SDL_RenderCopy(renderTarget, currentImage, &playerRect, &playerPos);
 					SDL_RenderPresent(renderTarget);
 					break;
+					//Win splash screen
 				case STATE_ROOM2:
 					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 					SDL_RenderClear(renderTarget);
@@ -565,6 +539,7 @@ int main(int argc, char* args[]) {
 						stateID = STATE_TITLE;
 					}
 					break;
+					//Game over screen
 				case STATE_NULL:
 					SDL_SetRenderDrawColor(renderTarget, 0xFF, 0xFF, 0xFF, 0xFF);
 					SDL_RenderClear(renderTarget);
@@ -579,6 +554,7 @@ int main(int argc, char* args[]) {
 						stateID = STATE_EXIT;
 					}
 					break;
+					//Exit game state
 				case STATE_EXIT:
 					SDL_DestroyWindow(window);
 					SDL_DestroyTexture(currentImage);

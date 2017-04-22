@@ -34,12 +34,12 @@ public:
 
 	int getType();
 
-	SDL_Rect getBox();
+	SDL_Rect getTileBox();
 
 private:
-	SDL_Rect tBox;
+	SDL_Rect tileBox;
 
-	int mType;
+	int tType;
 };
 
 
@@ -52,6 +52,7 @@ bool checkCollision(SDL_Rect a, SDL_Rect b);
 
 bool touchGoal(SDL_Rect box, Tile *tiles[]);
 
-void render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip);
+bool touchGround(SDL_Rect box, Tile *tiles[]);
 
+bool setTiles(Tile* tiles[]);
 
