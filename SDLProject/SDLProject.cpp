@@ -189,8 +189,7 @@ SDL_Texture *LoadTexture(std::string filepath, SDL_Renderer *renderTarget)
 	return texture;
 }
 
-
-
+//Code adapted from LazyFoo's tiling tutorial
 bool setTiles(Tile *tiles[]) {
 	bool tilesLoaded = true;
 
@@ -290,6 +289,7 @@ bool loadMedia(Tile* tiles[]) {
 	return success;
 }
 
+//Code found in LazyFoo's collision tutorial
 bool checkCollision(SDL_Rect a, SDL_Rect b)
 {
 	//initialise sides of SDL_Rects
