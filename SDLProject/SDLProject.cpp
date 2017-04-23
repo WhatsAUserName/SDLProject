@@ -121,10 +121,8 @@ Tile::Tile(int x, int y, int tileType)
 
 void Tile::render(SDL_Rect& camera)
 {
-	//If the tile is on screen
 	if (checkCollision(camera, tileBox))
 	{
-		//Show the tile
 		gTileTexture.render(tileBox.x - camera.x, tileBox.y - camera.y, &TileClips[tType]);
 	}
 }
@@ -245,7 +243,6 @@ bool setTiles(Tile *tiles[]) {
 		}
 		if (tilesLoaded)
 		{
-			//clip the sprite sheet
 			TileClips[TILE_GRASS].x = 0;
 			TileClips[TILE_GRASS].y = 0;
 			TileClips[TILE_GRASS].w = TILE_WIDTH;
@@ -301,13 +298,11 @@ bool checkCollision(SDL_Rect a, SDL_Rect b)
 	int topA, topB;
 	int bottomA, bottomB;
 
-	//Calculate the sides of rect A
 	leftA = a.x;
 	rightA = a.x + a.w;
 	topA = a.y;
 	bottomA = a.y + a.h;
 
-	//Calculate the sides of rect B
 	leftB = b.x;
 	rightB = b.x + b.w;
 	topB = b.y;
